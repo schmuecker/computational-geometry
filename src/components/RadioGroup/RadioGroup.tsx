@@ -51,4 +51,5 @@ function RadioGroup({
   );
 }
 
-export { RadioGroup, Option };
+export { RadioGroup };
+export type { Option };

@@ -55,14 +55,15 @@ function grahamScan(points: Point[]): Vector[] {
   // Put Point on stack if it makes a CLOCKWISE turn relative to the previous 2 points on stack
   // the highest point, and the point with the minimal angle are guarenteed in the convex hull
   const secondPoint = relativePointList.shift()?.point;
-  const stack = [highestPoint, secondPoint];
+  if (!secondPoint) return [];
+
+  const stack: Point[] = [highestPoint, secondPoint];
 
   for (const relativePoint of relativePointList) {
     const next = relativePoint.point;
 
     // pop points off the stack as long as the vector makes a clockwise turn
     while (
-      stack[stack.length - 2] != undefined &&
       checkClockwiseTurn(
         stack[stack.length - 2],
         stack[stack.length - 1],
