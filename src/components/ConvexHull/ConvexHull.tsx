@@ -71,7 +71,7 @@ function ConvexHull() {
   // Todo. set origin of coordinate system to bottom left
   return (
     <div>
-      <div className="my-8 flex w-full ">
+      <div className="my-8 flex w-full justify-between items-end">
         <RadioGroup
           title="Algorithm"
           subtitle="Choose the algorithm you prefer"
@@ -79,10 +79,12 @@ function ConvexHull() {
           checkedOption={algo}
           onChange={handleAlgoChange}
         />
+        <div>
         <ResetButton onClick={handleReset} />
+        </div>
       </div>
       <Stage
-        className="bg-slate-800 rounded-xl"
+        className="bg-slate-800 rounded-xl overflow-hidden"
         width={Math.min(800, window.innerWidth * 0.8)}
         height={Math.min(600, window.innerHeight * 0.8)}
         onClick={handleCanvasClick}
