@@ -1,7 +1,5 @@
-import Konva from "konva";
 import React, { useState } from "react";
-import { Stage, Layer, Rect, Text, Circle, Line } from "react-konva";
-import { nanoid } from "nanoid";
+import { Stage, Layer, Circle, Line } from "react-konva";
 import { Point, Vector } from "../../lib/geometry";
 import { grahamScan } from "../../lib/algorithms/graham";
 
@@ -50,8 +48,8 @@ function ConvexHull() {
   return (
     <Stage
       className="bg-slate-800 rounded-xl"
-      width={Math.max(800, window.innerWidth * 0.8)}
-      height={Math.max(600, window.innerHeight * 0.8)}
+      width={Math.min(800, window.innerWidth * 0.8)}
+      height={Math.min(600, window.innerHeight * 0.8)}
       onClick={handleClick}
     >
       <Layer>
