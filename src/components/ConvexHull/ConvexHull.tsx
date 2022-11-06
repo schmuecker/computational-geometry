@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Konva from "konva";
 import { Stage, Layer, Circle, Line } from "react-konva";
 
 import { Point, Vector } from "../../lib/geometry";
@@ -42,9 +43,13 @@ function ConvexHull() {
     vectors = jarvisMarch(points);
   }
 
-  const handleCanvasClick = (e) => {
+  const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
+    if (!stage) return;
+
     const pointerPosition = stage.getPointerPosition();
+    if (!pointerPosition) return;
+
     const { x, y } = pointerPosition;
 
     const newPoint = new Point(x, y);

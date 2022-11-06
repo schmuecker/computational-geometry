@@ -20,7 +20,7 @@ function jarvisMarch(points: Point[]): Vector[] {
   }
 
   const startingPoint = highestPoint;
-  const convexHull = [startingPoint];
+  const convexHull: Point[] = [startingPoint];
   let prevVertex = startingPoint;
 
   const remainingPoints = points.filter(function (item) {
@@ -48,6 +48,8 @@ function jarvisMarch(points: Point[]): Vector[] {
       }
     }
     if (canditate === startingPoint) complete = true;
+    if (!canditate) continue;
+
     convexHull.push(canditate);
     prevVertex = canditate;
   }
