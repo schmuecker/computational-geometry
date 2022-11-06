@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Stage, Layer, Circle, Line } from "react-konva";
+
 import { Point, Vector } from "../../lib/geometry";
-import { grahamScan } from "../../lib/algorithms/graham";
+import { grahamScan, jarvisMarch } from "../../lib/algorithms";
+import { RadioGroup, Option } from "../RadioGroup/RadioGroup";
+import { ResetButton } from "../Button/ResetButton";
 
 interface CanvasPointProps {
   point: Point;
@@ -22,12 +25,24 @@ function CanvasVector({ vector }: CanvasVectorProps) {
   return <Line points={points} stroke="red" strokeWidth={3} />;
 }
 
+const algorithms = [
+  { id: "graham", label: "Graham Scan" },
+  { id: "jarvis", label: "Jarvis March" },
+];
+
 function ConvexHull() {
   const [points, setPoints] = useState<Point[]>([]);
+  const [algo, setAlgo] = useState<Option["id"]>(() => algorithms[0].id);
 
-  const vectors = grahamScan(points);
+  let vectors: Vector[] = [];
+  if (algo === "graham") {
+    vectors = grahamScan(points);
+  }
+  if (algo === "jarvis") {
+    vectors = jarvisMarch(points);
+  }
 
-  const handleClick = (e) => {
+  const handleCanvasClick = (e) => {
     const stage = e.target.getStage();
     const pointerPosition = stage.getPointerPosition();
     const { x, y } = pointerPosition;
@@ -44,23 +59,44 @@ function ConvexHull() {
     setPoints(newPoints);
   };
 
+  const handleAlgoChange = (id: Option["id"]) => {
+    setAlgo(id);
+    // handleReset();
+  };
+
+  const handleReset = () => {
+    setPoints([]);
+  };
+
   // Todo. set origin of coordinate system to bottom left
   return (
-    <Stage
-      className="bg-slate-800 rounded-xl"
-      width={Math.min(800, window.innerWidth * 0.8)}
-      height={Math.min(600, window.innerHeight * 0.8)}
-      onClick={handleClick}
-    >
-      <Layer>
-        {vectors.map((vector) => {
-          return <CanvasVector key={vector.id} vector={vector} />;
-        })}
-        {points.map((point) => {
-          return <CanvasPoint key={point.id} point={point} />;
-        })}
-      </Layer>
-    </Stage>
+    <div>
+      <div className="my-8 flex w-full ">
+        <RadioGroup
+          title="Algorithm"
+          subtitle="Choose the algorithm you prefer"
+          options={algorithms}
+          checkedOption={algo}
+          onChange={handleAlgoChange}
+        />
+        <ResetButton onClick={handleReset} />
+      </div>
+      <Stage
+        className="bg-slate-800 rounded-xl"
+        width={Math.min(800, window.innerWidth * 0.8)}
+        height={Math.min(600, window.innerHeight * 0.8)}
+        onClick={handleCanvasClick}
+      >
+        <Layer>
+          {vectors.map((vector) => {
+            return <CanvasVector key={vector.id} vector={vector} />;
+          })}
+          {points.map((point) => {
+            return <CanvasPoint key={point.id} point={point} />;
+          })}
+        </Layer>
+      </Stage>
+    </div>
   );
 }
 

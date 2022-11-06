@@ -1,7 +1,8 @@
 import { Point, Vector } from "../geometry";
-import { radToDegrees } from "../helper";
+import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
 
 function grahamScan(points: Point[]): Vector[] {
+  console.log("Graham Scan");
   if (points.length < 3) {
     return [];
   }
@@ -56,14 +57,6 @@ function grahamScan(points: Point[]): Vector[] {
   const secondPoint = relativePointList.shift()?.point;
   const stack = [highestPoint, secondPoint];
 
-  const checkClockwiseTurn = (pointA: Point, pointB: Point, next: Point) => {
-    const baseVector = new Vector(pointA, pointB);
-    const newVector = new Vector(pointB, next);
-
-    const cross = baseVector.cross(newVector);
-    return Math.sign(cross);
-  };
-
   for (const relativePoint of relativePointList) {
     const next = relativePoint.point;
 
@@ -74,7 +67,7 @@ function grahamScan(points: Point[]): Vector[] {
         stack[stack.length - 2],
         stack[stack.length - 1],
         next
-      ) < 0
+      ) === ORIENTATION.CW
     ) {
       // delete points that create clockwise turn
       stack.pop();
