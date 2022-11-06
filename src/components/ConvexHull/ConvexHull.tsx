@@ -91,7 +91,7 @@ function ConvexHull() {
       <Stage
         className="bg-slate-800 rounded-xl overflow-hidden"
         width={window.innerWidth}
-        height={Math.min(600, window.innerHeight)}
+        height={window.innerHeight * 0.6}
         onClick={handleCanvasClick}
       >
         <Layer>
