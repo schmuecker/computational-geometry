@@ -35,7 +35,14 @@ function ConvexHull() {
     const { x, y } = pointerPosition;
 
     const newPoint = new Point(x, y);
-    const newPoints = [...points, newPoint];
+    const fitleredPoints = points.filter((point) => {
+      if (point.x == newPoint.x && point.y == newPoint.y) {
+        return false;
+      }
+      return true;
+    });
+
+    const newPoints = [...fitleredPoints, newPoint];
     setPoints(newPoints);
   };
 

@@ -36,7 +36,7 @@ function grahamScan(points: Point[]): Vector[] {
 
   // Sort remaining points by angle to the highest point
   relativePointList.sort((a, b) => {
-    if (a.angle > b.angle) {
+    if (a.angle >= b.angle) {
       return 1;
     }
     if (a.angle < b.angle) {
