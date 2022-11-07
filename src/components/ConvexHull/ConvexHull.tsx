@@ -3,7 +3,7 @@ import Konva from "konva";
 import { Stage, Layer, Circle, Line } from "react-konva";
 
 import { Point, Vector } from "../../lib/geometry";
-import { grahamScan, jarvisMarch } from "../../lib/algorithms";
+import { grahamScan, grahamScan2, jarvisMarch } from "../../lib/algorithms";
 import { RadioGroup, Option } from "../RadioGroup/RadioGroup";
 import { ResetButton } from "../Button/ResetButton";
 
