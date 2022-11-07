@@ -38,6 +38,7 @@ function CanvasVector({ vector }: CanvasVectorProps) {
 
 const algorithms = [
   { id: "graham", label: "Graham Scan" },
+  { id: "graham2", label: "Graham Scan 2" },
   { id: "jarvis", label: "Jarvis March" },
 ];
 
@@ -48,6 +49,9 @@ function ConvexHull() {
   let vectors: Vector[] = [];
   if (algo === "graham") {
     vectors = grahamScan(points);
+  }
+  if (algo === "graham2") {
+    vectors = grahamScan2(points);
   }
   if (algo === "jarvis") {
     vectors = jarvisMarch(points);
