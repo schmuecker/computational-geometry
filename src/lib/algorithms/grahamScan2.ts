@@ -52,7 +52,7 @@ function grahamScan2(points: Point[]): Vector[] {
 
   // 3. Step
   // iterate over points in sorted order
-  // Put Point on stack if it makes a CLOCKWISE turn relative to the previous 2 points on stack
+  // Put Point on stack if it makes a COUNTERCLOCKWISE turn relative to the previous 2 points on stack
   // the highest point, and the point with the minimal angle are guarenteed in the convex hull
   const secondPoint = relativePointList.shift()?.point;
   if (!secondPoint) return [];

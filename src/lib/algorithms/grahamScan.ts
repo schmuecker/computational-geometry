@@ -1,5 +1,5 @@
 import { Point, Vector } from "../geometry";
-import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
+import { checkClockwiseTurn, ORIENTATION } from "../helper";
 
 function grahamScan(points: Point[]): Vector[] {
   console.log("Graham Scan");
@@ -7,14 +7,15 @@ function grahamScan(points: Point[]): Vector[] {
     return [];
   }
 
-  // Sort remaining points by angle to the highest point
+  // Step 1 Sort points
+  // Sort points by x coordinate
   points.sort((a, b) => {
     if (a.x < b.x) {
       return 1;
     } else if (a.x > b.x) {
       return -1;
     } else {
-      // Todo check which point is further away
+      // sort y coordinate if x is equal
       if (a.y < b.y) {
         return 1;
       } else {
@@ -23,16 +24,16 @@ function grahamScan(points: Point[]): Vector[] {
     }
   });
 
-  // 3. Step
+  // 2. Step
   // iterate over points in sorted order
-  // Put Point on stack if it makes a CLOCKWISE turn relative to the previous 2 points on stack
-  // the highest point, and the point with the minimal angle are guarenteed in the convex hull
+  // Put Point in upper Hull if it makes a CLOCKWISE turn relative to the previous 2 points on stack
+  // Repeat for lower Hull with reversed points
 
+  // Upper Hull
   const upperHalf: Point[] = [points[0], points[1]];
 
   for (const next of points.slice(2)) {
-    // pop points off the stack as long as the vector makes a clockwise turn
-    console.log("upper");
+    // pop points off the stack as long as the vector makes a counterclockwise turn
     while (
       upperHalf[upperHalf.length - 2] != undefined &&
       checkClockwiseTurn(
@@ -41,19 +42,18 @@ function grahamScan(points: Point[]): Vector[] {
         next
       ) === ORIENTATION.CCW
     ) {
-      // delete points that create clockwise turn
+      // delete points that create counterclockwise turn
       upperHalf.pop();
     }
 
     upperHalf.push(next);
   }
 
+  // Lower Hull
   const reversePoints = points.slice().reverse();
-  // Lower Half
   const lowerHalf: Point[] = [reversePoints[0], reversePoints[1]];
 
   for (const next of reversePoints.slice(2)) {
-    console.log("lower");
     // pop points off the stack as long as the vector makes a clockwise turn
     while (
       lowerHalf[lowerHalf.length - 2] != undefined &&
@@ -70,21 +70,24 @@ function grahamScan(points: Point[]): Vector[] {
     lowerHalf.push(next);
   }
 
+  // 3. Step
+  // Remove first and last points of one Half (since they occure in both halfs)
+  // and concat both halfs
   lowerHalf.pop();
   lowerHalf.shift();
 
-  const polygonPoints = lowerHalf.concat(upperHalf);
+  const hull = lowerHalf.concat(upperHalf);
 
   // Step 4
-  // from the points in the Stack create a List of Vectors which can be displayed on the canvas
-  let lastPoint = polygonPoints[0];
+  // from the points in the hull create a List of Vectors which can be displayed on the canvas
+  let lastPoint = hull[0];
   let vectorList = [];
-  for (let i = 1; i < polygonPoints.length; i++) {
-    vectorList.push(new Vector(lastPoint, polygonPoints[i]));
-    lastPoint = polygonPoints[i];
+  for (let i = 1; i < hull.length; i++) {
+    vectorList.push(new Vector(lastPoint, hull[i]));
+    lastPoint = hull[i];
   }
 
-  vectorList.push(new Vector(lastPoint, polygonPoints[0]));
+  vectorList.push(new Vector(lastPoint, hull[0]));
   return vectorList;
 }
 
