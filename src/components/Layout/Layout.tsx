@@ -10,6 +10,7 @@ import {
   UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { NavLink, Link, Outlet } from "react-router-dom";
 
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -46,15 +47,17 @@ function Layout({ links }) {
             </div>
             <div className="mt-6 w-full flex-1 space-y-1 px-2">
               {links.map((item) => (
-                <a
+                <NavLink
                   key={item.name}
-                  href={item.href}
-                  className={classNames(
-                    item.current
-                      ? "bg-indigo-800 text-white"
-                      : "text-indigo-100 hover:bg-indigo-800 hover:text-white",
-                    "group w-full p-3 rounded-md flex flex-col items-center text-xs font-medium"
-                  )}
+                  to={item.href}
+                  className={({ isActive }) =>
+                    classNames(
+                      isActive
+                        ? "bg-indigo-800 text-white"
+                        : "text-indigo-100 hover:bg-indigo-800 hover:text-white",
+                      "group w-full p-3 rounded-md flex flex-col items-center text-xs font-medium"
+                    )
+                  }
                   aria-current={item.current ? "page" : undefined}
                 >
                   <item.icon
@@ -67,7 +70,7 @@ function Layout({ links }) {
                     aria-hidden="true"
                   />
                   <span className="mt-2">{item.name}</span>
-                </a>
+                </NavLink>
               ))}
             </div>
           </div>
@@ -137,15 +140,17 @@ function Layout({ links }) {
                     <nav className="flex h-full flex-col">
                       <div className="space-y-1">
                         {links.map((item) => (
-                          <a
+                          <NavLink
                             key={item.name}
-                            href={item.href}
-                            className={classNames(
-                              item.current
-                                ? "bg-indigo-800 text-white"
-                                : "text-indigo-100 hover:bg-indigo-800 hover:text-white",
-                              "group py-2 px-3 rounded-md flex items-center text-sm font-medium"
-                            )}
+                            to={item.href}
+                            className={({ isActive }) =>
+                              classNames(
+                                isActive
+                                  ? "bg-indigo-800 text-white"
+                                  : "text-indigo-100 hover:bg-indigo-800 hover:text-white",
+                                "group py-2 px-3 rounded-md flex items-center text-sm font-medium"
+                              )
+                            }
                             aria-current={item.current ? "page" : undefined}
                           >
                             <item.icon
@@ -158,7 +163,7 @@ function Layout({ links }) {
                               aria-hidden="true"
                             />
                             <span>{item.name}</span>
-                          </a>
+                          </NavLink>
                         ))}
                       </div>
                     </nav>
@@ -199,13 +204,16 @@ function Layout({ links }) {
                   Photos
                 </h1>
                 {/* Your content */}
+                <div className="px-8">
+                  <Outlet />
+                </div>
               </section>
             </main>
 
             {/* Secondary column (hidden on smaller screens) */}
-            <aside className="hidden w-96 overflow-y-auto border-l border-gray-200 bg-white lg:block">
-              {/* Your content */}
-            </aside>
+            {/* <aside className="hidden w-96 overflow-y-auto border-l border-gray-200 bg-white lg:block">
+              Your content 
+            </aside> */}
           </div>
         </div>
       </div>

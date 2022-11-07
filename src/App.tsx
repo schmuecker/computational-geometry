@@ -1,28 +1,20 @@
-import {
-  Bars3BottomLeftIcon,
-  CogIcon,
-  HomeIcon,
-  PhotoIcon,
-  RectangleStackIcon,
-  Squares2X2Icon,
-  UserGroupIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import ConvexHull from "./components/ConvexHull/ConvexHull";
+import { HomeIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import useRedirect from "./assets/hooks/useRedirect";
+
 import Layout from "./components/Layout/Layout";
 
 const links = [
-  { name: "Home", href: "/convex-hull", icon: HomeIcon, current: false },
-  { name: "Convex Hull", href: "/convex-hull", icon: HomeIcon, current: false },
+  { name: "Convex Hull", href: "/convex-hull", icon: HomeIcon },
   {
     name: "Sweeping Lines",
     href: "/sweeping-lines",
     icon: Squares2X2Icon,
-    current: false,
   },
 ];
 
 function App() {
+  useRedirect("/", "/convex-hull");
+
   return <Layout links={links} />;
 }
 
