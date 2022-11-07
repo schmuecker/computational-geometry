@@ -3,7 +3,7 @@ import Konva from "konva";
 import { Stage, Layer, Circle, Line } from "react-konva";
 
 import { Point, Vector } from "../../lib/geometry";
-import { grahamScan, grahamScan2, jarvisMarch } from "../../lib/algorithms";
+import { grahamScan, jarvisMarch, monotoneChain } from "../../lib/algorithms";
 import { RadioGroup, Option } from "../RadioGroup/RadioGroup";
 import { ResetButton } from "../Button/ResetButton";
 
@@ -36,9 +36,9 @@ function CanvasVector({ vector }: CanvasVectorProps) {
   return <Line points={points} stroke="#f97316" strokeWidth={3} />;
 }
 
-const algorithms = [
+const algorithms: Option[] = [
   { id: "graham", label: "Graham Scan" },
-  { id: "graham2", label: "Graham Scan 2" },
+  { id: "monotoneChain", label: "Monotone Chain" },
   { id: "jarvis", label: "Jarvis March" },
 ];
 
@@ -50,11 +50,11 @@ function ConvexHull() {
   if (algo === "graham") {
     vectors = grahamScan(points);
   }
-  if (algo === "graham2") {
-    vectors = grahamScan2(points);
-  }
   if (algo === "jarvis") {
     vectors = jarvisMarch(points);
+  }
+  if (algo === "monotoneChain") {
+    vectors = monotoneChain(points);
   }
 
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
