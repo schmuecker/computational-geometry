@@ -9,11 +9,21 @@ import { ResetButton } from "../Button/ResetButton";
 
 interface CanvasPointProps {
   point: Point;
+  onDelete: (id: Point["id"]) => void;
 }
 
-function CanvasPoint({ point }: CanvasPointProps) {
-  const { x, y } = point;
-  return <Circle width={20} height={20} x={x} y={y} fill="white" />;
+function CanvasPoint({ point, onDelete }: CanvasPointProps) {
+  const { x, y, id } = point;
+  return (
+    <Circle
+      width={16}
+      height={16}
+      x={x}
+      y={y}
+      fill="white"
+      onContextMenu={() => onDelete(point.id)}
+    />
+  );
 }
 
 interface CanvasVectorProps {
@@ -23,7 +33,7 @@ interface CanvasVectorProps {
 function CanvasVector({ vector }: CanvasVectorProps) {
   const { a, b } = vector;
   const points = [a.x, a.y, b.x, b.y];
-  return <Line points={points} stroke="red" strokeWidth={3} />;
+  return <Line points={points} stroke="#f97316" strokeWidth={3} />;
 }
 
 const algorithms = [
@@ -44,6 +54,9 @@ function ConvexHull() {
   }
 
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const isRightClick = e.evt.button === 2;
+    if (isRightClick) return;
+
     const stage = e.target.getStage();
     if (!stage) return;
 
@@ -64,9 +77,13 @@ function ConvexHull() {
     setPoints(newPoints);
   };
 
+  const handleDelete = (id: Point["id"]) => {
+    const newPoints = points.filter((point) => point.id !== id);
+    setPoints(newPoints);
+  };
+
   const handleAlgoChange = (id: Option["id"]) => {
     setAlgo(id);
-    // handleReset();
   };
 
   const handleReset = () => {
@@ -93,13 +110,20 @@ function ConvexHull() {
         width={window.innerWidth}
         height={window.innerHeight * 0.6}
         onClick={handleCanvasClick}
+        onContextMenu={(e) => e.evt.preventDefault()}
       >
         <Layer>
           {vectors.map((vector) => {
             return <CanvasVector key={vector.id} vector={vector} />;
           })}
           {points.map((point) => {
-            return <CanvasPoint key={point.id} point={point} />;
+            return (
+              <CanvasPoint
+                key={point.id}
+                point={point}
+                onDelete={handleDelete}
+              />
+            );
           })}
         </Layer>
       </Stage>
