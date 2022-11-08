@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, ReactElement, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   Bars3BottomLeftIcon,
@@ -9,41 +9,38 @@ import {
   Squares2X2Icon,
   UserGroupIcon,
   XMarkIcon,
+  CubeTransparentIcon,
 } from "@heroicons/react/24/outline";
-import { NavLink, Link, Outlet } from "react-router-dom";
-
-const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Sign out", href: "#" },
-];
+import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function Layout({ links }) {
+interface Link {
+  name: string;
+  href: string;
+  icon: ReactElement;
+  current: boolean;
+}
+interface LayoutProps {
+  links: Link[];
+}
+
+function Layout({ links }: LayoutProps) {
+  const { pathname } = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const currentLink = links.find((link) => link.href === pathname);
 
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-50">
-        <body class="h-full overflow-hidden">
-        ```
-      */}
       <div className="flex h-full">
         {/* Narrow sidebar */}
-        <div className="hidden w-28 overflow-y-auto bg-indigo-700 md:block">
+        <div className="hidden w-28 overflow-y-auto bg-blue-700 md:block">
           <div className="flex w-full flex-col items-center py-6">
             <div className="flex flex-shrink-0 items-center">
-              <img
-                className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=white"
-                alt="Your Company"
-              />
+              <CubeTransparentIcon className="h-8 w-auto text-white" />
             </div>
             <div className="mt-6 w-full flex-1 space-y-1 px-2">
               {links.map((item) => (
@@ -53,8 +50,8 @@ function Layout({ links }) {
                   className={({ isActive }) =>
                     classNames(
                       isActive
-                        ? "bg-indigo-800 text-white"
-                        : "text-indigo-100 hover:bg-indigo-800 hover:text-white",
+                        ? "bg-blue-800 text-white"
+                        : "text-blue-100 hover:bg-blue-800 hover:text-white",
                       "group w-full p-3 rounded-md flex flex-col items-center text-xs font-medium"
                     )
                   }
@@ -64,12 +61,14 @@ function Layout({ links }) {
                     className={classNames(
                       item.current
                         ? "text-white"
-                        : "text-indigo-300 group-hover:text-white",
+                        : "text-blue-300 group-hover:text-white",
                       "h-6 w-6"
                     )}
                     aria-hidden="true"
                   />
-                  <span className="mt-2">{item.name}</span>
+                  <span className="mt-2 text-center font-mono">
+                    {item.name}
+                  </span>
                 </NavLink>
               ))}
             </div>
@@ -105,7 +104,7 @@ function Layout({ links }) {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-indigo-700 pt-5 pb-4">
+                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-blue-700 pt-5 pb-4">
                   <Transition.Child
                     as={Fragment}
                     enter="ease-in-out duration-300"
@@ -130,11 +129,7 @@ function Layout({ links }) {
                     </div>
                   </Transition.Child>
                   <div className="flex flex-shrink-0 items-center px-4">
-                    <img
-                      className="h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/mark.svg?color=white"
-                      alt="Your Company"
-                    />
+                    <CubeTransparentIcon className="h-8 w-auto text-white" />
                   </div>
                   <div className="mt-5 h-0 flex-1 overflow-y-auto px-2">
                     <nav className="flex h-full flex-col">
@@ -146,8 +141,8 @@ function Layout({ links }) {
                             className={({ isActive }) =>
                               classNames(
                                 isActive
-                                  ? "bg-indigo-800 text-white"
-                                  : "text-indigo-100 hover:bg-indigo-800 hover:text-white",
+                                  ? "bg-blue-800 text-white"
+                                  : "text-blue-100 hover:bg-blue-800 hover:text-white",
                                 "group py-2 px-3 rounded-md flex items-center text-sm font-medium"
                               )
                             }
@@ -157,12 +152,12 @@ function Layout({ links }) {
                               className={classNames(
                                 item.current
                                   ? "text-white"
-                                  : "text-indigo-300 group-hover:text-white",
+                                  : "text-blue-300 group-hover:text-white",
                                 "mr-3 h-6 w-6"
                               )}
                               aria-hidden="true"
                             />
-                            <span>{item.name}</span>
+                            <span className="font-mono">{item.name}</span>
                           </NavLink>
                         ))}
                       </div>
@@ -183,12 +178,15 @@ function Layout({ links }) {
             <div className="relative z-10 flex h-16 flex-shrink-0 border-b border-gray-200 bg-white shadow-sm">
               <button
                 type="button"
-                className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
+                className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
               </button>
+              <div className="flex items-center ml-4 md:ml-8 font-mono">
+                {currentLink?.name}
+              </div>
             </div>
           </header>
 
