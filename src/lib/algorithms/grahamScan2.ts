@@ -27,7 +27,6 @@ function grahamScan2(points: Point[]): Vector[] {
 
   const relativePointList = [];
   for (const point of remainingPoints) {
-    // const angle = horizontal.cross(new Vector(highestPoint, point));
     const angle = radToDegrees(
       Math.atan2(point.y - highestPoint.y, point.x - highestPoint.x)
     );

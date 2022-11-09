@@ -77,6 +77,7 @@ function grahamScan(points: Point[]): Vector[] {
   lowerHalf.shift();
 
   const hull = lowerHalf.concat(upperHalf);
+  console.log(hull);
 
   // Step 4
   // from the points in the hull create a List of Vectors which can be displayed on the canvas
