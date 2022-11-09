@@ -3,7 +3,7 @@ import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
 
 function jarvisMarch(points: Point[]): Vector[] {
   console.log("Jarvis March");
-  if (points.length < 3) {
+  if (points.length < 2) {
     return [];
   }
 
@@ -22,10 +22,6 @@ function jarvisMarch(points: Point[]): Vector[] {
   const startingPoint = highestPoint;
   const convexHull: Point[] = [startingPoint];
   let prevVertex = startingPoint;
-
-  const remainingPoints = points.filter(function (item) {
-    return item.id != highestPoint.id;
-  });
 
   // Step 2
   //

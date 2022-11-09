@@ -1,94 +1,92 @@
 import { Point, Vector } from "../geometry";
-import { checkClockwiseTurn, ORIENTATION } from "../helper";
+import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
 
 function grahamScan(points: Point[]): Vector[] {
   console.log("Graham Scan");
-  if (points.length < 3) {
+  if (points.length < 2) {
     return [];
   }
 
-  // Step 1 Sort points
-  // Sort points by x coordinate
-  points.sort((a, b) => {
-    if (a.x < b.x) {
-      return 1;
-    } else if (a.x > b.x) {
-      return -1;
-    } else {
-      // sort y coordinate if x is equal
-      if (a.y < b.y) {
-        return 1;
-      } else {
-        return -1;
-      }
+  // 1. Step
+  // Loop over list of Points and select the one with the lowest Y coordinate
+  // lowest point is guarenteed to be part of the convex Hull
+  // Top Left corner is [0,0]
+  let highestPoint = points[0];
+
+  for (const point of points) {
+    if (point.y < highestPoint.y) {
+      highestPoint = point;
     }
-  });
+  }
 
   // 2. Step
-  // iterate over points in sorted order
-  // Put Point in upper Hull if it makes a CLOCKWISE turn relative to the previous 2 points on stack
-  // Repeat for lower Hull with reversed points
+  // sort the remaining points by the angle, relative to the lowest point and the horizontal
+  const remainingPoints = points.filter(function (item) {
+    return item.id != highestPoint.id;
+  });
 
-  // Upper Hull
-  const upperHalf: Point[] = [points[0], points[1]];
+  const relativePointList = [];
+  for (const point of remainingPoints) {
+    // const angle = horizontal.cross(new Vector(highestPoint, point));
+    const angle = radToDegrees(
+      Math.atan2(point.y - highestPoint.y, point.x - highestPoint.x)
+    );
 
-  for (const next of points.slice(2)) {
-    // pop points off the stack as long as the vector makes a counterclockwise turn
-    while (
-      upperHalf[upperHalf.length - 2] != undefined &&
-      checkClockwiseTurn(
-        upperHalf[upperHalf.length - 2],
-        upperHalf[upperHalf.length - 1],
-        next
-      ) === ORIENTATION.CCW
-    ) {
-      // delete points that create counterclockwise turn
-      upperHalf.pop();
-    }
-
-    upperHalf.push(next);
+    relativePointList.push({ point, angle });
   }
 
-  // Lower Hull
-  const reversePoints = points.slice().reverse();
-  const lowerHalf: Point[] = [reversePoints[0], reversePoints[1]];
-
-  for (const next of reversePoints.slice(2)) {
-    // pop points off the stack as long as the vector makes a clockwise turn
-    while (
-      lowerHalf[lowerHalf.length - 2] != undefined &&
-      checkClockwiseTurn(
-        lowerHalf[lowerHalf.length - 2],
-        lowerHalf[lowerHalf.length - 1],
-        next
-      ) === ORIENTATION.CCW
-    ) {
-      // delete points that create clockwise turn
-      lowerHalf.pop();
+  // Sort remaining points by angle to the highest point
+  relativePointList.sort((a, b) => {
+    if (a.angle >= b.angle) {
+      return 1;
     }
-
-    lowerHalf.push(next);
-  }
+    if (a.angle < b.angle) {
+      return -1;
+    }
+    if (a.angle == b.angle) {
+      // Todo check which point is further away
+      return 0;
+    }
+    return 0;
+  });
 
   // 3. Step
-  // Remove first and last points of one Half (since they occure in both halfs)
-  // and concat both halfs
-  lowerHalf.pop();
-  lowerHalf.shift();
+  // iterate over points in sorted order
+  // Put Point on stack if it makes a COUNTERCLOCKWISE turn relative to the previous 2 points on stack
+  // the highest point, and the point with the minimal angle are guarenteed in the convex hull
+  const secondPoint = relativePointList.shift()?.point;
+  if (!secondPoint) return [];
 
-  const hull = lowerHalf.concat(upperHalf);
-  console.log(hull);
+  const stack: Point[] = [highestPoint, secondPoint];
 
-  // Step 4
-  // from the points in the hull create a List of Vectors which can be displayed on the canvas
-  let lastPoint = hull[0];
-  let vectorList = [];
-  for (let i = 1; i < hull.length; i++) {
-    vectorList.push(new Vector(lastPoint, hull[i]));
-    lastPoint = hull[i];
+  for (const relativePoint of relativePointList) {
+    const next = relativePoint.point;
+
+    // pop points off the stack as long as the vector makes a clockwise turn
+    while (
+      checkClockwiseTurn(
+        stack[stack.length - 2],
+        stack[stack.length - 1],
+        next
+      ) === ORIENTATION.CW
+    ) {
+      // delete points that create clockwise turn
+      stack.pop();
+    }
+
+    stack.push(next);
   }
 
-  vectorList.push(new Vector(lastPoint, hull[0]));
+  // Step 4
+  // from the points in the Stack create a List of Vectors which can be displayed on the canvas
+  let lastPoint = stack[0];
+  let vectorList = [];
+  for (let i = 1; i < stack.length; i++) {
+    vectorList.push(new Vector(lastPoint, stack[i]));
+    lastPoint = stack[i];
+  }
+
+  vectorList.push(new Vector(lastPoint, stack[0]));
   return vectorList;
 }
 

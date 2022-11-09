@@ -1,44 +1,14 @@
 import React, { useState } from "react";
-import Konva from "konva";
-import { Stage, Layer, Circle, Line } from "react-konva";
 
 import { Point, Vector } from "../../lib/geometry";
-import { grahamScan, grahamScan2, jarvisMarch } from "../../lib/algorithms";
+import { grahamScan, jarvisMarch, monotoneChain } from "../../lib/algorithms";
 import { RadioGroup, Option } from "../RadioGroup/RadioGroup";
 import { ResetButton } from "../Button/ResetButton";
+import Canvas from "./Canvas/Canvas";
 
-interface CanvasPointProps {
-  point: Point;
-  onDelete: (id: Point["id"]) => void;
-}
-
-function CanvasPoint({ point, onDelete }: CanvasPointProps) {
-  const { x, y, id } = point;
-  return (
-    <Circle
-      width={16}
-      height={16}
-      x={x}
-      y={y}
-      fill="white"
-      onContextMenu={() => onDelete(point.id)}
-    />
-  );
-}
-
-interface CanvasVectorProps {
-  vector: Vector;
-}
-
-function CanvasVector({ vector }: CanvasVectorProps) {
-  const { a, b } = vector;
-  const points = [a.x, a.y, b.x, b.y];
-  return <Line points={points} stroke="#f97316" strokeWidth={3} />;
-}
-
-const algorithms = [
+const algorithms: Option[] = [
   { id: "graham", label: "Graham Scan" },
-  { id: "graham2", label: "Graham Scan 2" },
+  { id: "monotoneChain", label: "Monotone Chain" },
   { id: "jarvis", label: "Jarvis March" },
 ];
 
@@ -50,38 +20,25 @@ function ConvexHull() {
   if (algo === "graham") {
     vectors = grahamScan(points);
   }
-  if (algo === "graham2") {
-    vectors = grahamScan2(points);
-  }
   if (algo === "jarvis") {
     vectors = jarvisMarch(points);
   }
+  if (algo === "monotoneChain") {
+    vectors = monotoneChain(points);
+  }
 
-  const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    const isRightClick = e.evt.button === 2;
-    if (isRightClick) return;
-
-    const stage = e.target.getStage();
-    if (!stage) return;
-
-    const pointerPosition = stage.getPointerPosition();
-    if (!pointerPosition) return;
-
-    const { x, y } = pointerPosition;
-
-    const newPoint = new Point(x, y);
+  const handleAddPoint = (newPoint: Point) => {
     const fitleredPoints = points.filter((point) => {
       if (point.x == newPoint.x && point.y == newPoint.y) {
         return false;
       }
       return true;
     });
-
     const newPoints = [...fitleredPoints, newPoint];
     setPoints(newPoints);
   };
 
-  const handleDelete = (id: Point["id"]) => {
+  const handleDeletePoint = (id: Point["id"]) => {
     const newPoints = points.filter((point) => point.id !== id);
     setPoints(newPoints);
   };
@@ -109,28 +66,12 @@ function ConvexHull() {
           <ResetButton onClick={handleReset} />
         </div>
       </div>
-      <Stage
-        className="bg-slate-800 rounded-xl overflow-hidden"
-        width={window.innerWidth}
-        height={window.innerHeight * 0.6}
-        onClick={handleCanvasClick}
-        onContextMenu={(e) => e.evt.preventDefault()}
-      >
-        <Layer>
-          {vectors.map((vector) => {
-            return <CanvasVector key={vector.id} vector={vector} />;
-          })}
-          {points.map((point) => {
-            return (
-              <CanvasPoint
-                key={point.id}
-                point={point}
-                onDelete={handleDelete}
-              />
-            );
-          })}
-        </Layer>
-      </Stage>
+      <Canvas
+        points={points}
+        vectors={vectors}
+        onAddPoint={handleAddPoint}
+        onDeletePoint={handleDeletePoint}
+      />
     </div>
   );
 }

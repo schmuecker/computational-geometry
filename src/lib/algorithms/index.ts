@@ -1,5 +1,5 @@
-import { grahamScan2 } from "./grahamScan2";
 import { grahamScan } from "./grahamScan";
 import { jarvisMarch } from "./jarvisMarch";
+import { monotoneChain } from "./monotoneChain";
 
-export { grahamScan, grahamScan2, jarvisMarch };
+export { grahamScan, jarvisMarch, monotoneChain };
