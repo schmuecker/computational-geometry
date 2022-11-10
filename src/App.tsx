@@ -2,7 +2,7 @@ import { CubeIcon, PauseIcon } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
-import Layout from "./components/Layout/Layout";
+import RootLayout from "./components/RootLayout/RootLayout";
 
 function App() {
   useRedirect("/", "/convex-hull");
@@ -23,7 +23,7 @@ function App() {
     },
   ];
 
-  return <Layout links={links} />;
+  return <RootLayout links={links} />;
 }
 
 export default App;
