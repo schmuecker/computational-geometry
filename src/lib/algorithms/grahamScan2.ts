@@ -2,7 +2,6 @@ import { Point, Vector } from "../geometry";
 import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
 
 function grahamScan2(points: Point[]): Vector[] {
-  console.log("Graham Scan");
   if (points.length < 3) {
     return [];
   }

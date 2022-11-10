@@ -2,7 +2,6 @@ import { Point, Vector } from "../geometry";
 import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
 
 function jarvisMarch(points: Point[]): Vector[] {
-  console.log("Jarvis March");
   if (points.length < 2) {
     return [];
   }
