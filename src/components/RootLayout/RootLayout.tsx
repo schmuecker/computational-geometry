@@ -30,10 +30,10 @@ function Layout({ links }: LayoutProps) {
     <>
       <div className="flex h-full">
         {/* Narrow sidebar */}
-        <div className="hidden w-28 overflow-y-auto bg-blue-700 md:block">
+        <div className="hidden w-28 overflow-y-auto bg-ebony-900 md:block">
           <div className="flex w-full flex-col items-center py-6">
             <div className="flex flex-shrink-0 items-center">
-              <CubeTransparentIcon className="h-8 w-auto text-white" />
+              <CubeTransparentIcon className="h-8 w-auto text-ebony-100" />
             </div>
             <div className="mt-6 w-full flex-1 space-y-1 px-2">
               {links.map((item) => (
@@ -43,8 +43,8 @@ function Layout({ links }: LayoutProps) {
                   className={({ isActive }) =>
                     clsx(
                       isActive
-                        ? "bg-blue-800 text-white"
-                        : "text-blue-100 hover:bg-blue-800 hover:text-white",
+                        ? "bg-portage-400/50 text-white"
+                        : "text-blue-100 hover:bg-white/5 hover:text-white",
                       "group w-full p-3 rounded-md flex flex-col items-center text-xs font-medium"
                     )
                   }
@@ -54,8 +54,8 @@ function Layout({ links }: LayoutProps) {
                     className={clsx(
                       item.current
                         ? "text-white"
-                        : "text-blue-300 group-hover:text-white",
-                      "h-6 w-6"
+                        : "text-ebony-300 group-hover:text-ebony-100 ",
+                      "h-6 w-6 transition"
                     )}
                     aria-hidden="true"
                   />
@@ -97,7 +97,7 @@ function Layout({ links }: LayoutProps) {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-blue-700 pt-5 pb-4">
+                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-ebony-900 pt-5 pb-4">
                   <Transition.Child
                     as={Fragment}
                     enter="ease-in-out duration-300"
@@ -134,9 +134,9 @@ function Layout({ links }: LayoutProps) {
                             className={({ isActive }) =>
                               clsx(
                                 isActive
-                                  ? "bg-blue-800 text-white"
-                                  : "text-blue-100 hover:bg-blue-800 hover:text-white",
-                                "group py-2 px-3 rounded-md flex items-center text-sm font-medium"
+                                  ? "bg-portage-400/50 text-white"
+                                  : "text-blue-100 hover:bg-white/5 hover:text-white",
+                                "group py-2 px-3 rounded-md flex items-center text-sm font-medium transition"
                               )
                             }
                             aria-current={item.current ? "page" : undefined}
@@ -145,8 +145,8 @@ function Layout({ links }: LayoutProps) {
                               className={clsx(
                                 item.current
                                   ? "text-white"
-                                  : "text-blue-300 group-hover:text-white",
-                                "mr-3 h-6 w-6"
+                                  : "text-ebony-300 group-hover:text-ebony-100 ",
+                                "mr-3 h-6 w-6 transition"
                               )}
                               aria-hidden="true"
                             />
