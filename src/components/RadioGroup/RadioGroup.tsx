@@ -35,7 +35,7 @@ function RadioGroup({
                 type="radio"
                 checked={option.id === checkedOption}
                 onChange={() => onChange(option.id)}
-                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 border-gray-300 text-persian-pink-500 focus:ring-persian-pink-200"
               />
               <label
                 htmlFor={option.id}

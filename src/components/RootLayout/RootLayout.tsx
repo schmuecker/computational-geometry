@@ -45,7 +45,7 @@ function Layout({ links }: LayoutProps) {
                       isActive
                         ? "bg-portage-400/50 text-white"
                         : "text-blue-100 hover:bg-white/5 hover:text-white",
-                      "group w-full p-3 rounded-md flex flex-col items-center text-xs font-medium"
+                      "group flex w-full flex-col items-center rounded-md p-3 text-xs font-medium"
                     )
                   }
                   aria-current={item.current ? "page" : undefined}
@@ -136,7 +136,7 @@ function Layout({ links }: LayoutProps) {
                                 isActive
                                   ? "bg-portage-400/50 text-white"
                                   : "text-blue-100 hover:bg-white/5 hover:text-white",
-                                "group py-2 px-3 rounded-md flex items-center text-sm font-medium transition"
+                                "group flex items-center rounded-md py-2 px-3 text-sm font-medium transition"
                               )
                             }
                             aria-current={item.current ? "page" : undefined}
@@ -177,7 +177,7 @@ function Layout({ links }: LayoutProps) {
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
               </button>
-              <div className="flex items-center ml-4 md:ml-8 font-mono">
+              <div className="ml-4 flex items-center font-mono md:ml-8">
                 {currentLink?.name}
               </div>
             </div>
@@ -195,7 +195,7 @@ function Layout({ links }: LayoutProps) {
                   Photos
                 </h1>
                 {/* Your content */}
-                <div className="px-8">
+                <div className="p-8">
                   <Outlet />
                 </div>
               </section>

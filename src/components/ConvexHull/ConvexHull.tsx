@@ -54,7 +54,7 @@ function ConvexHull() {
   // Todo. set origin of coordinate system to bottom left
   return (
     <div>
-      <div className="my-8 flex w-full justify-between items-end">
+      <div className="mb-8 flex w-full items-end justify-between">
         <RadioGroup
           title="Algorithm"
           subtitle="Choose the algorithm you prefer"

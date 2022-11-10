@@ -29,7 +29,7 @@ interface CanvasVectorProps {
 function CanvasVector({ vector }: CanvasVectorProps) {
   const { a, b } = vector;
   const points = [a.x, a.y, b.x, b.y];
-  return <Line points={points} stroke="#f97316" strokeWidth={3} />;
+  return <Line points={points} stroke="#F471B5" strokeWidth={3} />;
 }
 
 interface CanvasProps {
@@ -61,7 +61,7 @@ function Canvas({ points, vectors, onAddPoint, onDeletePoint }: CanvasProps) {
 
   return (
     <Stage
-      className="bg-slate-800 rounded-xl overflow-hidden"
+      className="overflow-hidden rounded-xl bg-ebony-900"
       width={window.innerWidth}
       height={window.innerHeight * 0.6}
       onClick={handleCanvasClick}
