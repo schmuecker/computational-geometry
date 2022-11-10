@@ -3,12 +3,15 @@ import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
 import RootLayout from "./components/RootLayout/RootLayout";
+import { Path } from "./types/Path";
+import { HeroIcon } from "./types/HeroIcon";
+import { Link } from "./types/Link";
 
 function App() {
   useRedirect("/", "/convex-hull");
   const { pathname } = useLocation();
 
-  const links = [
+  const links: Link[] = [
     {
       name: "Convex Hull",
       href: "/convex-hull",
@@ -16,10 +19,10 @@ function App() {
       current: pathname === "/convex-hull",
     },
     {
-      name: "Sweeping Lines",
-      href: "/sweeping-lines",
+      name: "Sweep Line",
+      href: "/sweep-line",
       icon: PauseIcon,
-      current: pathname === "/sweeping-lines",
+      current: pathname === "/sweep-line",
     },
   ];
 

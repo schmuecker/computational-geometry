@@ -1,23 +1,17 @@
 import clsx from "clsx";
 import { Fragment, ReactElement, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Bars3BottomLeftIcon,
   XMarkIcon,
   CubeTransparentIcon,
 } from "@heroicons/react/24/outline";
 
-import { HeroIcon } from "../../types/HeroIcon";
+import { Link as LinkType } from "../../types/Link";
 
-interface Link {
-  name: string;
-  href: string;
-  current: boolean;
-  icon: HeroIcon;
-}
 interface LayoutProps {
-  links: Link[];
+  links: LinkType[];
 }
 
 function Layout({ links }: LayoutProps) {

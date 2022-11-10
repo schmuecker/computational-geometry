@@ -1,5 +1,5 @@
 function SweepingLines() {
-  return <div>Sweeping Lines</div>;
+  return <div>Sweep Line</div>;
 }
 
 export default SweepingLines;

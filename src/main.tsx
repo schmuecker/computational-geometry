@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       <Routes>
         <Route path="/" element={<App />}>
           <Route path="convex-hull" element={<ConvexHull />} />
-          <Route path="sweeping-lines" element={<SweepingLines />} />
+          <Route path="sweep-line" element={<SweepingLines />} />
         </Route>
       </Routes>
     </BrowserRouter>
