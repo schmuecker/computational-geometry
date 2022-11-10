@@ -1,27 +1,20 @@
+import clsx from "clsx";
 import { Fragment, ReactElement, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 import {
   Bars3BottomLeftIcon,
-  CogIcon,
-  HomeIcon,
-  PhotoIcon,
-  RectangleStackIcon,
-  Squares2X2Icon,
-  UserGroupIcon,
   XMarkIcon,
   CubeTransparentIcon,
 } from "@heroicons/react/24/outline";
-import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+import { HeroIcon } from "../../types/HeroIcon";
 
 interface Link {
   name: string;
   href: string;
-  icon: ReactElement;
   current: boolean;
+  icon: HeroIcon;
 }
 interface LayoutProps {
   links: Link[];
@@ -48,7 +41,7 @@ function Layout({ links }: LayoutProps) {
                   key={item.name}
                   to={item.href}
                   className={({ isActive }) =>
-                    classNames(
+                    clsx(
                       isActive
                         ? "bg-blue-800 text-white"
                         : "text-blue-100 hover:bg-blue-800 hover:text-white",
@@ -58,7 +51,7 @@ function Layout({ links }: LayoutProps) {
                   aria-current={item.current ? "page" : undefined}
                 >
                   <item.icon
-                    className={classNames(
+                    className={clsx(
                       item.current
                         ? "text-white"
                         : "text-blue-300 group-hover:text-white",
@@ -139,7 +132,7 @@ function Layout({ links }: LayoutProps) {
                             key={item.name}
                             to={item.href}
                             className={({ isActive }) =>
-                              classNames(
+                              clsx(
                                 isActive
                                   ? "bg-blue-800 text-white"
                                   : "text-blue-100 hover:bg-blue-800 hover:text-white",
@@ -149,7 +142,7 @@ function Layout({ links }: LayoutProps) {
                             aria-current={item.current ? "page" : undefined}
                           >
                             <item.icon
-                              className={classNames(
+                              className={clsx(
                                 item.current
                                   ? "text-white"
                                   : "text-blue-300 group-hover:text-white",

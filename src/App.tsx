@@ -1,6 +1,6 @@
 import { CubeIcon, PauseIcon } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
-import useRedirect from "./assets/hooks/useRedirect";
+import useRedirect from "./hooks/useRedirect";
 
 import Layout from "./components/Layout/Layout";
 
