@@ -29,7 +29,7 @@ interface CanvasVectorProps {
 function CanvasVector({ vector }: CanvasVectorProps) {
   const { a, b } = vector;
   const points = [a.x, a.y, b.x, b.y];
-  return <Line points={points} stroke="#F471B5" strokeWidth={3} />;
+  return <Line points={points} stroke="#ea580c" strokeWidth={3} />;
 }
 
 interface CanvasProps {
