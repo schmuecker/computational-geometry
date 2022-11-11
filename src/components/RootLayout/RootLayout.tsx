@@ -1,11 +1,11 @@
 import clsx from "clsx";
-import { Fragment, ReactElement, useState } from "react";
+import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Bars3BottomLeftIcon,
   XMarkIcon,
-  CubeTransparentIcon,
+  CubeTransparentIcon
 } from "@heroicons/react/24/outline";
 
 import { Link as LinkType } from "../../types/Link";
@@ -61,7 +61,6 @@ function Layout({ links }: LayoutProps) {
             </div>
           </div>
         </div>
-
         {/* Mobile menu */}
         <Transition.Root show={mobileMenuOpen} as={Fragment}>
           <Dialog
@@ -158,7 +157,6 @@ function Layout({ links }: LayoutProps) {
             </div>
           </Dialog>
         </Transition.Root>
-
         {/* Content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <header className="w-full">

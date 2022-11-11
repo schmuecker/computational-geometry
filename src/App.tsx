@@ -3,8 +3,6 @@ import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
 import RootLayout from "./components/RootLayout/RootLayout";
-import { Path } from "./types/Path";
-import { HeroIcon } from "./types/HeroIcon";
 import { Link } from "./types/Link";
 
 function App() {
@@ -16,14 +14,14 @@ function App() {
       name: "Convex Hull",
       href: "/convex-hull",
       icon: CubeIcon,
-      current: pathname === "/convex-hull",
+      current: pathname === "/convex-hull"
     },
     {
       name: "Sweep Line",
       href: "/sweep-line",
       icon: PauseIcon,
-      current: pathname === "/sweep-line",
-    },
+      current: pathname === "/sweep-line"
+    }
   ];
 
   return <RootLayout links={links} />;
