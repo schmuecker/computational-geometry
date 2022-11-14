@@ -1,11 +1,10 @@
 import Konva from "konva";
 import React, { useEffect, useState } from "react";
-import { Stage, Layer, Circle, Line } from "react-konva";
-import useKeyPress from "../../../hooks/useKeyPress";
+import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
+
 import onKeyPressed from "../../../hooks/useOnKeyPressed";
 import {
   EVENTS,
-  HorizontalEvent,
   IsoSweepResult,
 } from "../../../lib/algorithms/sweep-line/isoSweep";
 
@@ -48,14 +47,7 @@ interface CanvasVectorProps {
 function CanvasVector({ vector, stroke }: CanvasVectorProps) {
   const { a, b } = vector;
   const points = [a.x, a.y, b.x, b.y];
-  return (
-    <Line
-      points={points}
-      stroke={stroke || "white"}
-      strokeWidth={3}
-      onMouseOver={() => console.log("hover ")}
-    />
-  );
+  return <Line points={points} stroke={stroke || "white"} strokeWidth={3} />;
 }
 
 interface SweepLineCanvasProps {
@@ -74,7 +66,15 @@ function SweepLineCanvas({
   onAddSegment,
 }: SweepLineCanvasProps) {
   const [sweepX, setSweepX] = useState<number>(0);
+  const [mouseDown, setMouseDown] = useState<boolean>(false);
+  const [overSweepLine, setOverSweepLine] = useState<boolean>(false);
   const [firstPoint, setFirstPoint] = useState<Point | undefined>(undefined);
+
+  useEffect(() => {
+    if (!mouseDown) {
+      setOverSweepLine(false);
+    }
+  }, [mouseDown]);
 
   const visibleIntersections = intersections.filter((intersection) => {
     return intersection.x <= sweepX;
@@ -127,23 +127,7 @@ function SweepLineCanvas({
         >
           {"<- Step"}
         </button>
-        <button
-          className="bg-slate-300"
-          onClick={() => {
-            setSweepX((s) => s - 10);
-          }}
-        >
-          {"<- x"}
-        </button>
         {sweepX}
-        <button
-          className="bg-slate-300"
-          onClick={() => {
-            setSweepX((s) => s + 10);
-          }}
-        >
-          {"x ->"}
-        </button>
         <button
           className="bg-slate-300"
           onClick={() => {
@@ -159,18 +143,13 @@ function SweepLineCanvas({
         height={window.innerHeight * 0.6}
         onClick={handleCanvasClick}
         onContextMenu={(e) => e.evt.preventDefault()}
+        onMouseDown={() => setMouseDown(true)}
+        onMouseUp={() => setMouseDown(false)}
+        onMouseMove={(e) => {
+          // mouseDown && overSweepLine && setSweepX(e.evt.offsetX)
+        }}
       >
         <Layer>
-          {/* Sweep Line */}
-          <CanvasVector
-            stroke={"#576180"}
-            vector={
-              new Vector(
-                new Point(sweepX, 0),
-                new Point(sweepX, window.innerHeight)
-              )
-            }
-          />
           {/* Segments + Vertical segment points */}
           {segments.map((segment) => {
             const points = [];
@@ -233,6 +212,51 @@ function SweepLineCanvas({
               onDelete={handleDeletePoint}
             />
           )}
+          {/* Sweep Line */}
+          <Group
+            draggable
+            dragBoundFunc={(pos) => ({ x: pos.x, y: 0 })}
+            onDragMove={(e) => setSweepX(e.evt.offsetX)}
+          >
+            <CanvasVector
+              stroke={"#576180"}
+              vector={
+                new Vector(new Point(20, 0), new Point(20, window.innerHeight))
+              }
+            />
+            <Rect
+              width={24}
+              height={28}
+              x={8}
+              y={-8}
+              fill="#7B88AD"
+              cornerRadius={4}
+              onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                if (!stage) return;
+                const container = stage.container();
+                container.style.cursor = "grab";
+              }}
+              onMouseUp={(e) => {
+                const stage = e.target.getStage();
+                if (!stage) return;
+                const container = stage.container();
+                container.style.cursor = "grab";
+              }}
+              onMouseDown={(e) => {
+                const stage = e.target.getStage();
+                if (!stage) return;
+                const container = stage.container();
+                container.style.cursor = "grabbing";
+              }}
+              onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                if (!stage) return;
+                const container = stage.container();
+                container.style.cursor = "default";
+              }}
+            />
+          </Group>
         </Layer>
       </Stage>
     </div>
