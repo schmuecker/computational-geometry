@@ -7,16 +7,20 @@ function SweepLine() {
   const [segments, setSegments] = useState<Vector[]>([]);
 
   const handleAddSegment = (newSegment: Vector) => {
-    console.log("New segment", newSegment);
     setSegments((state) => [...state, newSegment]);
   };
 
-  const result = isoSweep(segments);
-  console.log(result);
+  const { events, intersections } = isoSweep(segments);
+
   return (
     <div>
       <p className="mb-8 text-base font-medium text-gray-900">Sweep Line</p>
-      <SweepLineCanvas segments={segments} onAddSegment={handleAddSegment} />
+      <SweepLineCanvas
+        events={events}
+        intersections={intersections}
+        segments={segments}
+        onAddSegment={handleAddSegment}
+      />
     </div>
   );
 }

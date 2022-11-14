@@ -1,19 +1,19 @@
 import { Point, Vector } from "../../geometry";
 
-enum EVENTS {
+export enum EVENTS {
   START,
   END,
   VERTICAL,
 }
 
-interface HorizontalEvent {
+export interface HorizontalEvent {
   id: Vector["id"];
   x: Point["x"];
   y: Point["y"];
   type: EVENTS.START | EVENTS.END;
 }
 
-interface VerticalEvent {
+export interface VerticalEvent {
   id: Vector["id"];
   x: Point["x"];
   y1: Point["y"];
@@ -26,13 +26,19 @@ type Event = HorizontalEvent | VerticalEvent;
 interface Intersection {
   x: Point["x"];
   y: Point["y"];
+  eventId: Event["id"];
   segments: Vector["id"][];
+}
+
+export interface IsoSweepResult {
+  intersections: Intersection[];
+  events: Event[];
 }
 
 /* ALGORITHM */
 
-function isoSweep(segments: Vector[]): Intersection[] {
-  console.log({ segments });
+function isoSweep(segments: Vector[]): IsoSweepResult {
+  // console.log({ segments });
 
   /* Put start points left of end points */
   const parsedSegments = segments.map((segment) => {
@@ -59,7 +65,7 @@ function isoSweep(segments: Vector[]): Intersection[] {
     return 0;
   });
 
-  console.log({ parsedSegments });
+  // console.log({ parsedSegments });
 
   /* Create event list */
   const events: Event[] = [];
@@ -107,7 +113,7 @@ function isoSweep(segments: Vector[]): Intersection[] {
     return 0;
   });
 
-  console.log({ events });
+  // console.log({ events });
 
   /* Iterate over events */
   let activeSegments: HorizontalEvent[] = [];
@@ -132,17 +138,18 @@ function isoSweep(segments: Vector[]): Intersection[] {
           return false;
         }
       );
-      intersectingSegments.forEach((segment) => {
+      intersectingSegments.forEach((horizontalSegment) => {
         const { x } = event;
-        const { y } = segment;
-        const segments = [event.id, segment.id];
-        intersections.push({ x, y, segments });
+        const { y } = horizontalSegment;
+        const eventId = event.id;
+        const segments = [event.id, horizontalSegment.id];
+        intersections.push({ x, y, eventId, segments });
       });
     }
   });
 
-  console.log("Done. Found intersections", intersections);
-  return intersections;
+  // console.log("Done. Found intersections", intersections);
+  return { events, intersections };
 }
 
 export { isoSweep };
