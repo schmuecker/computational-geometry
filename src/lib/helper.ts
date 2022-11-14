@@ -27,4 +27,24 @@ const checkClockwiseTurn = (pointA: Point, pointB: Point, next: Point) => {
   }
 };
 
-export { checkClockwiseTurn, radToDegrees, ORIENTATION };
+const isVectorHorizontal = (vector: Vector) => {
+  if (vector.a.y === vector.b.y) {
+    return true;
+  }
+  return false;
+};
+
+const isVectorVertical = (vector: Vector) => {
+  if (vector.a.x === vector.b.x) {
+    return true;
+  }
+  return false;
+};
+
+export {
+  checkClockwiseTurn,
+  radToDegrees,
+  ORIENTATION,
+  isVectorHorizontal,
+  isVectorVertical,
+};
