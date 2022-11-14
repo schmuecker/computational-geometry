@@ -42,7 +42,7 @@ function isoSweep(segments: Vector[]): IsoSweepResult {
 
   /* Put start points left of end points */
   const parsedSegments = segments.map((segment) => {
-    const shouldSwap = segment.b.x < segment.a.x;
+    const shouldSwap = segment.b.x < segment.a.x || segment.b.y < segment.a.y;
     let parsedVector = segment;
     if (shouldSwap) {
       parsedVector = new Vector(segment.b, segment.a);
