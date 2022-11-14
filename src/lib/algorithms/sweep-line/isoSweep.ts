@@ -45,6 +45,7 @@ function isoSweep(segments: Vector[]): Intersection[] {
   });
 
   /* Sort segments in x direction */
+  /* TODO: I think we don't need this */
   parsedSegments.sort((segA, segB) => {
     if (segA.a.x < segB.a.x) {
       return -1;
