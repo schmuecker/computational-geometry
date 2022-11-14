@@ -1,5 +1,5 @@
-import { Point, Vector } from "../geometry";
-import { checkClockwiseTurn, ORIENTATION } from "../helper";
+import { Point, Vector } from "../../geometry";
+import { checkClockwiseTurn, ORIENTATION } from "../../helper";
 
 function monotoneChain(points: Point[]): Vector[] {
   if (points.length < 2) {

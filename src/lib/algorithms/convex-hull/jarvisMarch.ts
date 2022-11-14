@@ -1,5 +1,5 @@
-import { Point, Vector } from "../geometry";
-import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../helper";
+import { Point, Vector } from "../../geometry";
+import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../../helper";
 
 function jarvisMarch(points: Point[]): Vector[] {
   if (points.length < 2) {

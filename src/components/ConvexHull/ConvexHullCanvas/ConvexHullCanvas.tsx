@@ -39,7 +39,12 @@ interface CanvasProps {
   onDeletePoint: (id: Point["id"]) => void;
 }
 
-function Canvas({ points, vectors, onAddPoint, onDeletePoint }: CanvasProps) {
+function ConvexHullCanvas({
+  points,
+  vectors,
+  onAddPoint,
+  onDeletePoint,
+}: CanvasProps) {
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
     if (isRightClick) return;
@@ -81,4 +86,4 @@ function Canvas({ points, vectors, onAddPoint, onDeletePoint }: CanvasProps) {
   );
 }
 
-export default Canvas;
+export default ConvexHullCanvas;

@@ -1,5 +1,9 @@
-import { grahamScan } from "./grahamScan";
-import { jarvisMarch } from "./jarvisMarch";
-import { monotoneChain } from "./monotoneChain";
+/* Convex Hull */
+import { grahamScan } from "./convex-hull/grahamScan";
+import { jarvisMarch } from "./convex-hull/jarvisMarch";
+import { monotoneChain } from "./convex-hull/monotoneChain";
 
-export { grahamScan, jarvisMarch, monotoneChain };
+/* Sweep Line */
+import { isoSweep } from "./sweep-line/isoSweep";
+
+export { grahamScan, jarvisMarch, monotoneChain, isoSweep };

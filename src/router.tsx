@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import ConvexHull from "./components/ConvexHull/ConvexHull";
-import SweepingLines from "./components/SweepingLines/SweepingLines";
+import SweepingLines from "./components/SweepLine/SweepLine";
 
 const router = createBrowserRouter([
   {
@@ -12,14 +12,14 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/convex-hull",
-        element: <ConvexHull />
+        element: <ConvexHull />,
       },
       {
         path: "/sweep-line",
-        element: <SweepingLines />
-      }
-    ]
-  }
+        element: <SweepingLines />,
+      },
+    ],
+  },
 ]);
 
 export { router };

@@ -4,7 +4,7 @@ import { Point, Vector } from "../../lib/geometry";
 import { grahamScan, jarvisMarch, monotoneChain } from "../../lib/algorithms";
 import { RadioGroup, Option } from "../RadioGroup/RadioGroup";
 import { ResetButton } from "../Button/ResetButton";
-import Canvas from "./Canvas/Canvas";
+import ConvexHullCanvas from "./ConvexHullCanvas/ConvexHullCanvas";
 
 const algorithms: Option[] = [
   { id: "graham", label: "Graham Scan" },
@@ -66,7 +66,7 @@ function ConvexHull() {
           <ResetButton onClick={handleReset} />
         </div>
       </div>
-      <Canvas
+      <ConvexHullCanvas
         points={points}
         vectors={vectors}
         onAddPoint={handleAddPoint}
