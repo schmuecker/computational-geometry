@@ -175,7 +175,7 @@ function SweepLineCanvas({
                       point={point}
                       width={10}
                       height={10}
-                      fill="#6D2B09"
+                      fill="#933A0C"
                     />
                   );
                 })}
