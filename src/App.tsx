@@ -14,14 +14,14 @@ function App() {
       name: "Convex Hull",
       href: "/convex-hull",
       icon: CubeIcon,
-      current: pathname === "/convex-hull"
+      current: pathname === "/convex-hull",
     },
     {
       name: "Sweep Line",
       href: "/sweep-line",
       icon: PauseIcon,
-      current: pathname === "/sweep-line"
-    }
+      current: pathname === "/sweep-line",
+    },
   ];
 
   return <RootLayout links={links} />;

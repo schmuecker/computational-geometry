@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   Bars3BottomLeftIcon,
   XMarkIcon,
-  CubeTransparentIcon
+  CubeTransparentIcon,
 } from "@heroicons/react/24/outline";
 
 import { Link as LinkType } from "../../types/Link";
@@ -14,11 +14,15 @@ interface LayoutProps {
   links: LinkType[];
 }
 
-function Layout({ links }: LayoutProps) {
+function RootLayout({ links }: LayoutProps) {
   const { pathname } = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const currentLink = links.find((link) => link.href === pathname);
+
+  const close = () => {
+    setIsOpen(false);
+  };
 
   return (
     <>
@@ -31,17 +35,15 @@ function Layout({ links }: LayoutProps) {
             </div>
             <div className="mt-6 w-full flex-1 space-y-1 px-2">
               {links.map((item) => (
-                <NavLink
+                <Link
                   key={item.name}
                   to={item.href}
-                  className={({ isActive }) =>
-                    clsx(
-                      isActive
-                        ? "bg-portage-400/50 text-white"
-                        : "text-blue-100 hover:bg-white/5 hover:text-white",
-                      "group flex w-full flex-col items-center rounded-md p-3 text-xs font-medium"
-                    )
-                  }
+                  className={clsx(
+                    item.current
+                      ? "bg-portage-400/50 text-white"
+                      : "text-blue-100 hover:bg-white/5 hover:text-white",
+                    "group flex w-full flex-col items-center rounded-md p-3 text-xs font-medium"
+                  )}
                   aria-current={item.current ? "page" : undefined}
                 >
                   <item.icon
@@ -56,17 +58,17 @@ function Layout({ links }: LayoutProps) {
                   <span className="mt-2 text-center font-mono">
                     {item.name}
                   </span>
-                </NavLink>
+                </Link>
               ))}
             </div>
           </div>
         </div>
         {/* Mobile menu */}
-        <Transition.Root show={mobileMenuOpen} as={Fragment}>
+        <Transition.Root show={isOpen} as={Fragment}>
           <Dialog
             as="div"
             className="relative z-20 md:hidden"
-            onClose={setMobileMenuOpen}
+            onClose={setIsOpen}
           >
             <Transition.Child
               as={Fragment}
@@ -104,7 +106,7 @@ function Layout({ links }: LayoutProps) {
                       <button
                         type="button"
                         className="flex h-12 w-12 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-white"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={close}
                       >
                         <XMarkIcon
                           className="h-6 w-6 text-white"
@@ -121,17 +123,16 @@ function Layout({ links }: LayoutProps) {
                     <nav className="flex h-full flex-col">
                       <div className="space-y-1">
                         {links.map((item) => (
-                          <NavLink
+                          <Link
+                            onClick={close}
                             key={item.name}
                             to={item.href}
-                            className={({ isActive }) =>
-                              clsx(
-                                isActive
-                                  ? "bg-portage-400/50 text-white"
-                                  : "text-blue-100 hover:bg-white/5 hover:text-white",
-                                "group flex items-center rounded-md py-2 px-3 text-sm font-medium transition"
-                              )
-                            }
+                            className={clsx(
+                              item.current
+                                ? "bg-portage-400/50 text-white"
+                                : "text-blue-100 hover:bg-white/5 hover:text-white",
+                              "group flex items-center rounded-md py-2 px-3 text-sm font-medium transition"
+                            )}
                             aria-current={item.current ? "page" : undefined}
                           >
                             <item.icon
@@ -144,7 +145,7 @@ function Layout({ links }: LayoutProps) {
                               aria-hidden="true"
                             />
                             <span className="font-mono">{item.name}</span>
-                          </NavLink>
+                          </Link>
                         ))}
                       </div>
                     </nav>
@@ -164,7 +165,7 @@ function Layout({ links }: LayoutProps) {
               <button
                 type="button"
                 className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden"
-                onClick={() => setMobileMenuOpen(true)}
+                onClick={() => setIsOpen(true)}
               >
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
@@ -204,4 +205,4 @@ function Layout({ links }: LayoutProps) {
   );
 }
 
-export default Layout;
+export default RootLayout;
