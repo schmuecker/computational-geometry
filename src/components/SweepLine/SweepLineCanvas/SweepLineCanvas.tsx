@@ -48,7 +48,14 @@ interface CanvasVectorProps {
 function CanvasVector({ vector, stroke }: CanvasVectorProps) {
   const { a, b } = vector;
   const points = [a.x, a.y, b.x, b.y];
-  return <Line points={points} stroke={stroke || "white"} strokeWidth={3} />;
+  return (
+    <Line
+      points={points}
+      stroke={stroke || "white"}
+      strokeWidth={3}
+      onMouseOver={() => console.log("hover ")}
+    />
+  );
 }
 
 interface SweepLineCanvasProps {
@@ -58,21 +65,17 @@ interface SweepLineCanvasProps {
   onAddSegment: (segment: Vector) => void;
 }
 
+function findPreviousEvent(events: Event[], x: number) {}
+
 function SweepLineCanvas({
   events,
   intersections,
   segments,
   onAddSegment,
 }: SweepLineCanvasProps) {
-  const [step, setStep] = useState<number>(0);
+  const [sweepX, setSweepX] = useState<number>(0);
   const [firstPoint, setFirstPoint] = useState<Point | undefined>(undefined);
 
-  const sweepX = events[step]?.x;
-  const visibleEvents = events.filter((event, index) => {
-    const isHorizontal =
-      event.type === EVENTS.START || event.type === EVENTS.END;
-    return index <= step && isHorizontal;
-  });
   const visibleIntersections = intersections.filter((intersection) => {
     return intersection.x <= sweepX;
   });
@@ -115,21 +118,39 @@ function SweepLineCanvas({
 
   return (
     <div>
-      <div className="flex">
+      <div className="flex space-x-4">
         <button
+          className="bg-slate-300"
           onClick={() => {
-            step > 0 && setStep((s) => s - 1);
+            setSweepX((s) => s - 10);
           }}
         >
-          Previous Step
+          {"<- Step"}
         </button>
-        {step}
         <button
+          className="bg-slate-300"
           onClick={() => {
-            step < events.length - 1 && setStep((s) => s + 1);
+            setSweepX((s) => s - 10);
           }}
         >
-          Next Step
+          {"<- x"}
+        </button>
+        {sweepX}
+        <button
+          className="bg-slate-300"
+          onClick={() => {
+            setSweepX((s) => s + 10);
+          }}
+        >
+          {"x ->"}
+        </button>
+        <button
+          className="bg-slate-300"
+          onClick={() => {
+            setSweepX((s) => s + 10);
+          }}
+        >
+          {"Step ->"}
         </button>
       </div>
       <Stage
@@ -141,17 +162,15 @@ function SweepLineCanvas({
       >
         <Layer>
           {/* Sweep Line */}
-          {sweepX && (
-            <CanvasVector
-              stroke={"#576180"}
-              vector={
-                new Vector(
-                  new Point(sweepX, 0),
-                  new Point(sweepX, window.innerHeight)
-                )
-              }
-            />
-          )}
+          <CanvasVector
+            stroke={"#576180"}
+            vector={
+              new Vector(
+                new Point(sweepX, 0),
+                new Point(sweepX, window.innerHeight)
+              )
+            }
+          />
           {/* Segments + Vertical segment points */}
           {segments.map((segment) => {
             const points = [];
@@ -183,7 +202,7 @@ function SweepLineCanvas({
             );
           })}
           {/* Horizontal events */}
-          {visibleEvents.map((event) => {
+          {events.map((event) => {
             const { type } = event;
             if (event.type === EVENTS.VERTICAL) {
               return null;
