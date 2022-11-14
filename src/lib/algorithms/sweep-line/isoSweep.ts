@@ -114,19 +114,14 @@ function isoSweep(segments: Vector[]): Intersection[] {
   events.forEach((event) => {
     if (event.type === EVENTS.START) {
       /* Start event */
-      console.log("Start point", event);
       activeSegments.push(event);
-      console.log("New active segments", activeSegments);
     } else if (event.type === EVENTS.END) {
       /* End event */
-      console.log("End point", event);
       activeSegments = activeSegments.filter((segment) => {
         return segment.id !== event.id;
       });
-      console.log("New active segments", activeSegments);
     } else if (event.type === EVENTS.VERTICAL) {
       /* Vertical event */
-      console.log("Vertical segment", event);
       const intersectingSegments = activeSegments.filter(
         (horizontalSegment) => {
           const { y } = horizontalSegment;
@@ -136,7 +131,6 @@ function isoSweep(segments: Vector[]): Intersection[] {
           return false;
         }
       );
-      console.log("intersectingSegments", intersectingSegments);
       intersectingSegments.forEach((segment) => {
         const { x } = event;
         const { y } = segment;
