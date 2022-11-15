@@ -2,7 +2,7 @@ import Konva from "konva";
 import React, { useEffect, useState } from "react";
 import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
 
-import onKeyPressed from "../../../hooks/useOnKeyPressed";
+import useOnKeyPressed from "../../../hooks/useOnKeyPressed";
 import {
   EVENTS,
   IsoSweepResult,
@@ -66,6 +66,7 @@ function SweepLineCanvas({
   onAddSegment,
 }: SweepLineCanvasProps) {
   const [sweepX, setSweepX] = useState<number>(0);
+  const [renderSweepLine, setRenderSweepLine] = useState<boolean>(true);
   const [mouseDown, setMouseDown] = useState<boolean>(false);
   const [overSweepLine, setOverSweepLine] = useState<boolean>(false);
   const [firstPoint, setFirstPoint] = useState<Point | undefined>(undefined);
@@ -80,7 +81,15 @@ function SweepLineCanvas({
     return intersection.x <= sweepX;
   });
 
-  onKeyPressed("Escape", () => setFirstPoint(undefined));
+  useOnKeyPressed("Escape", () => setFirstPoint(undefined));
+
+  const resetSweepLine = () => {
+    setSweepX(0);
+    setRenderSweepLine(false);
+    setTimeout(() => {
+      setRenderSweepLine(true);
+    });
+  };
 
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
@@ -105,6 +114,7 @@ function SweepLineCanvas({
       const newSegment = new Vector(firstPoint, secondPoint);
       onAddSegment(newSegment);
       setFirstPoint(undefined);
+      resetSweepLine();
       return;
     }
 
@@ -213,50 +223,55 @@ function SweepLineCanvas({
             />
           )}
           {/* Sweep Line */}
-          <Group
-            draggable
-            dragBoundFunc={(pos) => ({ x: pos.x, y: 0 })}
-            onDragMove={(e) => setSweepX(e.evt.offsetX)}
-          >
-            <CanvasVector
-              stroke={"#576180"}
-              vector={
-                new Vector(new Point(20, 0), new Point(20, window.innerHeight))
-              }
-            />
-            <Rect
-              width={24}
-              height={28}
-              x={8}
-              y={-8}
-              fill="#7B88AD"
-              cornerRadius={4}
-              onMouseEnter={(e) => {
-                const stage = e.target.getStage();
-                if (!stage) return;
-                const container = stage.container();
-                container.style.cursor = "grab";
-              }}
-              onMouseUp={(e) => {
-                const stage = e.target.getStage();
-                if (!stage) return;
-                const container = stage.container();
-                container.style.cursor = "grab";
-              }}
-              onMouseDown={(e) => {
-                const stage = e.target.getStage();
-                if (!stage) return;
-                const container = stage.container();
-                container.style.cursor = "grabbing";
-              }}
-              onMouseLeave={(e) => {
-                const stage = e.target.getStage();
-                if (!stage) return;
-                const container = stage.container();
-                container.style.cursor = "default";
-              }}
-            />
-          </Group>
+          {renderSweepLine ? (
+            <Group
+              draggable
+              dragBoundFunc={(pos) => ({ x: pos.x, y: 0 })}
+              onDragMove={(e) => setSweepX(e.evt.offsetX)}
+            >
+              <CanvasVector
+                stroke={"#576180"}
+                vector={
+                  new Vector(
+                    new Point(20, 0),
+                    new Point(20, window.innerHeight)
+                  )
+                }
+              />
+              <Rect
+                width={24}
+                height={28}
+                x={8}
+                y={-8}
+                fill="#7B88AD"
+                cornerRadius={4}
+                onMouseEnter={(e) => {
+                  const stage = e.target.getStage();
+                  if (!stage) return;
+                  const container = stage.container();
+                  container.style.cursor = "grab";
+                }}
+                onMouseUp={(e) => {
+                  const stage = e.target.getStage();
+                  if (!stage) return;
+                  const container = stage.container();
+                  container.style.cursor = "grab";
+                }}
+                onMouseDown={(e) => {
+                  const stage = e.target.getStage();
+                  if (!stage) return;
+                  const container = stage.container();
+                  container.style.cursor = "grabbing";
+                }}
+                onMouseLeave={(e) => {
+                  const stage = e.target.getStage();
+                  if (!stage) return;
+                  const container = stage.container();
+                  container.style.cursor = "default";
+                }}
+              />
+            </Group>
+          ) : null}
         </Layer>
       </Stage>
     </div>
