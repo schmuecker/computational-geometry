@@ -117,7 +117,7 @@ function isoSweep(segments: Vector[]): IsoSweepResult {
 
   /* Iterate over events */
   let activeSegments: HorizontalEvent[] = [];
-  let intersections: Intersection[] = [];
+  const intersections: Intersection[] = [];
   events.forEach((event) => {
     if (event.type === EVENTS.START) {
       /* Start event */

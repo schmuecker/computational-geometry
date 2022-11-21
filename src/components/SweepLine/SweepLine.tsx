@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { isoSweep } from "../../lib/algorithms";
-import { Point, Vector } from "../../lib/geometry";
+import { Vector } from "../../lib/geometry";
 import SweepLineCanvas from "./SweepLineCanvas/SweepLineCanvas";
 
 function SweepLine() {

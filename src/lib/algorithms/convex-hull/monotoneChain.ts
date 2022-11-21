@@ -80,7 +80,7 @@ function monotoneChain(points: Point[]): Vector[] {
   // Step 4
   // from the points in the hull create a List of Vectors which can be displayed on the canvas
   let lastPoint = hull[0];
-  let vectorList = [];
+  const vectorList = [];
   for (let i = 1; i < hull.length; i++) {
     vectorList.push(new Vector(lastPoint, hull[i]));
     lastPoint = hull[i];

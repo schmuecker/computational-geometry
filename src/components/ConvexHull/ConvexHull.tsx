@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { Point, Vector } from "../../lib/geometry";
 import { grahamScan, jarvisMarch, monotoneChain } from "../../lib/algorithms";

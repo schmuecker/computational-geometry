@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface Option {
   id: string;
   label: string;
@@ -18,7 +16,7 @@ function RadioGroup({
   checkedOption,
   onChange,
   title,
-  subtitle
+  subtitle,
 }: RadioGroupProps) {
   return (
     <div>

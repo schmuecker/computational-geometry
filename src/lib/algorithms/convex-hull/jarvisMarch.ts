@@ -1,5 +1,5 @@
 import { Point, Vector } from "../../geometry";
-import { checkClockwiseTurn, radToDegrees, ORIENTATION } from "../../helper";
+import { checkClockwiseTurn, ORIENTATION } from "../../helper";
 
 function jarvisMarch(points: Point[]): Vector[] {
   if (points.length < 2) {
@@ -52,7 +52,7 @@ function jarvisMarch(points: Point[]): Vector[] {
   // Step 4
   // from the points in the Stack create a List of Vectors which can be displayed on the canvas
   let lastPoint = convexHull[0];
-  let vectorList = [];
+  const vectorList = [];
   for (let i = 1; i < convexHull.length; i++) {
     vectorList.push(new Vector(lastPoint, convexHull[i]));
     lastPoint = convexHull[i];

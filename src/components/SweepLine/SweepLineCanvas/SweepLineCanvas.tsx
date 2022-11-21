@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
 
 import useOnKeyPressed from "../../../hooks/useOnKeyPressed";
@@ -58,8 +58,6 @@ interface SweepLineCanvasProps {
   onAddSegment: (segment: Vector) => void;
 }
 
-function findPreviousEvent(events: Event[], x: number) {}
-
 interface MouseOrTouchEvent extends KonvaEventObject<DragEvent> {
   evt: KonvaEventObject<DragEvent>["evt"] & {
     target: EventTarget & {
@@ -77,15 +75,7 @@ function SweepLineCanvas({
 }: SweepLineCanvasProps) {
   const [sweepX, setSweepX] = useState<number>(0);
   const [renderSweepLine, setRenderSweepLine] = useState<boolean>(true);
-  const [mouseDown, setMouseDown] = useState<boolean>(false);
-  const [overSweepLine, setOverSweepLine] = useState<boolean>(false);
   const [firstPoint, setFirstPoint] = useState<Point | undefined>(undefined);
-
-  useEffect(() => {
-    if (!mouseDown) {
-      setOverSweepLine(false);
-    }
-  }, [mouseDown]);
 
   const visibleIntersections = intersections.filter((intersection) => {
     return intersection.x <= sweepX;
@@ -144,11 +134,6 @@ function SweepLineCanvas({
         height={window.innerHeight * 0.6}
         onClick={handleCanvasClick}
         onContextMenu={(e) => e.evt.preventDefault()}
-        onMouseDown={() => setMouseDown(true)}
-        onMouseUp={() => setMouseDown(false)}
-        onMouseMove={(e) => {
-          // mouseDown && overSweepLine && setSweepX(e.evt.offsetX)
-        }}
       >
         <Layer>
           {/* Segments + Vertical segment points */}
@@ -220,8 +205,8 @@ function SweepLineCanvas({
               dragBoundFunc={(pos) => ({ x: pos.x, y: 0 })}
               onDragMove={(e: MouseOrTouchEvent) => {
                 if (!e?.evt?.target) return;
-                var rect = e.evt.target.getBoundingClientRect();
-                var bodyRect = document.body.getBoundingClientRect();
+                const rect = e.evt.target.getBoundingClientRect();
+                const bodyRect = document.body.getBoundingClientRect();
 
                 const screenX = e.evt.targetTouches
                   ? e.evt.targetTouches[0].pageX
