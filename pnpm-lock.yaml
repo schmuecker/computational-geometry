@@ -10,6 +10,7 @@ specifiers:
   '@typescript-eslint/parser': ^5.43.0
   '@vitejs/plugin-react': ^2.2.0
   autoprefixer: ^10.4.13
+  avl: ^1.5.3
   clsx: ^1.2.1
   eslint: ^8.28.0
   eslint-config-prettier: ^8.5.0
@@ -35,6 +36,7 @@ dependencies:
   '@headlessui/react': 1.7.4_biqbaboplfbrettd7655fr4n2y
   '@heroicons/react': 2.0.13_react@18.2.0
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.2
+  avl: 1.5.3
   clsx: 1.2.1
   konva: 8.3.13
   localforage: 1.10.0
@@ -802,6 +804,10 @@ packages:
       postcss: 8.4.18
       postcss-value-parser: 4.2.0
     dev: true
+
+  /avl/1.5.3:
+    resolution: {integrity: sha512-1qcOJeREIosJxIBof2nefabU9+Y3wCxXBb3ElQmNVOHP+Hu2BLWAh8CpU7xFnJNDMVBt2H5UOE2S/B7MEqhTsg==}
+    dev: false
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}

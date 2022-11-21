@@ -1,4 +1,5 @@
 import { Point, Vector } from "../../geometry";
+import AVLTree from "avl";
 
 export enum EVENTS {
   START,
@@ -27,7 +28,6 @@ interface Intersection {
   x: Point["x"];
   y: Point["y"];
   eventId: Event["id"];
-  segments: Vector["id"][];
 }
 
 export interface IsoSweepResult {
@@ -35,7 +35,7 @@ export interface IsoSweepResult {
   events: Event[];
 }
 
-function isoSweep(segments: Vector[]): IsoSweepResult {
+function isoSweep(segments: Vector[], maxY: number): IsoSweepResult {
   /* Put start points left of end points */
   const parsedSegments = segments.map((segment) => {
     const shouldSwap = segment.b.x < segment.a.x || segment.b.y < segment.a.y;
@@ -93,34 +93,27 @@ function isoSweep(segments: Vector[]): IsoSweepResult {
   });
 
   /* Iterate over events */
-  let activeSegments: HorizontalEvent[] = [];
+  const activeSegments = new AVLTree();
   const intersections: Intersection[] = [];
   events.forEach((event) => {
     if (event.type === EVENTS.START) {
       /* Start event */
-      activeSegments.push(event);
+      activeSegments.insert(event.y, event);
     } else if (event.type === EVENTS.END) {
       /* End event */
-      activeSegments = activeSegments.filter((segment) => {
-        return segment.id !== event.id;
-      });
+      activeSegments.remove(event.y);
     } else if (event.type === EVENTS.VERTICAL) {
       /* Vertical event */
-      const intersectingSegments = activeSegments.filter(
-        (horizontalSegment) => {
-          const { y } = horizontalSegment;
-          if (y >= event.y1 && y <= event.y2) {
-            return true;
-          }
-          return false;
+      activeSegments.range(event.y1, event.y2, (node) => {
+        const data = node?.data as HorizontalEvent;
+        if (!data) {
+          return;
         }
-      );
-      intersectingSegments.forEach((horizontalSegment) => {
-        const { x } = event;
-        const { y } = horizontalSegment;
-        const eventId = event.id;
-        const segments = [event.id, horizontalSegment.id];
-        intersections.push({ x, y, eventId, segments });
+        intersections.push({
+          eventId: event.id,
+          x: event.x,
+          y: data.y,
+        });
       });
     }
   });

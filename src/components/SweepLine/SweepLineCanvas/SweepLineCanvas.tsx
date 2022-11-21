@@ -55,6 +55,7 @@ interface SweepLineCanvasProps {
   intersections: IsoSweepResult["intersections"];
   segments: Vector[];
   onAddSegment: (segment: Vector) => void;
+  height: number;
 }
 
 interface MouseOrTouchEvent extends Konva.KonvaEventObject<DragEvent> {
@@ -71,6 +72,7 @@ function SweepLineCanvas({
   intersections,
   segments,
   onAddSegment,
+  height,
 }: SweepLineCanvasProps) {
   const [sweepX, setSweepX] = useState<number>(0);
   const [renderSweepLine, setRenderSweepLine] = useState<boolean>(true);
@@ -129,8 +131,8 @@ function SweepLineCanvas({
     <div>
       <Stage
         className="overflow-hidden rounded-xl bg-ebony-900"
-        width={window.innerWidth}
-        height={window.innerHeight * 0.6}
+        width={window.innerWidth * 0.9}
+        height={height}
         onClick={handleCanvasClick}
         onContextMenu={(e) => e.evt.preventDefault()}
       >
@@ -201,9 +203,12 @@ function SweepLineCanvas({
           {renderSweepLine ? (
             <Group
               draggable
-              dragBoundFunc={(pos) => ({ x: pos.x, y: 0 })}
+              dragBoundFunc={(pos) => ({
+                x: Math.min(Math.max(0, pos.x), window.innerWidth * 0.86),
+                y: 0,
+              })}
               onDragMove={(e: MouseOrTouchEvent) => {
-                if (!e?.evt?.target) return;
+                if (!e?.evt?.target?.getBoundingClientRect) return;
                 const rect = e.evt.target.getBoundingClientRect();
                 const bodyRect = document.body.getBoundingClientRect();
 

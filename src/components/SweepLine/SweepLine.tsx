@@ -6,7 +6,8 @@ import SweepLineCanvas from "./SweepLineCanvas/SweepLineCanvas";
 
 function SweepLine() {
   const [segments, setSegments] = useState<Vector[]>([]);
-  const { events, intersections } = isoSweep(segments);
+  const canvasHeight = window.innerHeight * 0.6;
+  const { events, intersections } = isoSweep(segments, canvasHeight);
 
   const handleAddSegment = (newSegment: Vector) => {
     setSegments((state) => [...state, newSegment]);
@@ -19,12 +20,15 @@ function SweepLine() {
   return (
     <div>
       <div className="mb-8 flex w-full items-end justify-between">
-        <p className="text-base font-medium text-gray-900">Sweep Line</p>
+        <p className="text-base font-medium text-gray-900">
+          Sweep Line O(n * log(n))
+        </p>
         <ResetButton onClick={handleReset} />
       </div>
       <SweepLineCanvas
         events={events}
         intersections={intersections}
+        height={canvasHeight}
         segments={segments}
         onAddSegment={handleAddSegment}
       />
