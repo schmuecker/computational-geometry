@@ -1,5 +1,4 @@
 import Konva from "konva";
-import { KonvaEventObject } from "konva/lib/Node";
 import React, { useState } from "react";
 import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
 
@@ -58,8 +57,8 @@ interface SweepLineCanvasProps {
   onAddSegment: (segment: Vector) => void;
 }
 
-interface MouseOrTouchEvent extends KonvaEventObject<DragEvent> {
-  evt: KonvaEventObject<DragEvent>["evt"] & {
+interface MouseOrTouchEvent extends Konva.KonvaEventObject<DragEvent> {
+  evt: Konva.KonvaEventObject<DragEvent>["evt"] & {
     target: EventTarget & {
       getBoundingClientRect: () => DOMRect;
     };
