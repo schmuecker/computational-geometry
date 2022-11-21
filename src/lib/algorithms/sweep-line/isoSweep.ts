@@ -50,23 +50,6 @@ function isoSweep(segments: Vector[]): IsoSweepResult {
     return parsedVector;
   });
 
-  /* Sort segments in x direction */
-  /* TODO: I think we don't need this */
-  parsedSegments.sort((segA, segB) => {
-    if (segA.a.x < segB.a.x) {
-      return -1;
-    }
-    if (segB.a.x < segA.a.x) {
-      return 1;
-    }
-    if (segB.a.y < segA.a.y) {
-      return 1;
-    }
-    return 0;
-  });
-
-  // console.log({ parsedSegments });
-
   /* Create event list */
   const events: Event[] = [];
   parsedSegments.forEach((segment) => {
