@@ -35,11 +35,7 @@ export interface IsoSweepResult {
   events: Event[];
 }
 
-/* ALGORITHM */
-
 function isoSweep(segments: Vector[]): IsoSweepResult {
-  // console.log({ segments });
-
   /* Put start points left of end points */
   const parsedSegments = segments.map((segment) => {
     const shouldSwap = segment.b.x < segment.a.x || segment.b.y < segment.a.y;
@@ -96,8 +92,6 @@ function isoSweep(segments: Vector[]): IsoSweepResult {
     return 0;
   });
 
-  // console.log({ events });
-
   /* Iterate over events */
   let activeSegments: HorizontalEvent[] = [];
   const intersections: Intersection[] = [];
@@ -131,7 +125,6 @@ function isoSweep(segments: Vector[]): IsoSweepResult {
     }
   });
 
-  // console.log("Done. Found intersections", intersections);
   return { events, intersections };
 }
 
