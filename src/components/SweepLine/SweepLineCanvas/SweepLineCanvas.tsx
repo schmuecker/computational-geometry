@@ -1,4 +1,5 @@
 import Konva from "konva";
+import { KonvaEventObject } from "konva/lib/Node";
 import React, { useEffect, useState } from "react";
 import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
 
@@ -58,6 +59,15 @@ interface SweepLineCanvasProps {
 }
 
 function findPreviousEvent(events: Event[], x: number) {}
+
+interface MouseOrTouchEvent extends KonvaEventObject<DragEvent> {
+  evt: KonvaEventObject<DragEvent>["evt"] & {
+    target: EventTarget & {
+      getBoundingClientRect: () => DOMRect;
+    };
+    targetTouches: TouchList;
+  };
+}
 
 function SweepLineCanvas({
   events,
@@ -128,25 +138,6 @@ function SweepLineCanvas({
 
   return (
     <div>
-      <div className="flex space-x-4">
-        <button
-          className="bg-slate-300"
-          onClick={() => {
-            setSweepX((s) => s - 10);
-          }}
-        >
-          {"<- Step"}
-        </button>
-        {sweepX}
-        <button
-          className="bg-slate-300"
-          onClick={() => {
-            setSweepX((s) => s + 10);
-          }}
-        >
-          {"Step ->"}
-        </button>
-      </div>
       <Stage
         className="overflow-hidden rounded-xl bg-ebony-900"
         width={window.innerWidth}
@@ -227,7 +218,18 @@ function SweepLineCanvas({
             <Group
               draggable
               dragBoundFunc={(pos) => ({ x: pos.x, y: 0 })}
-              onDragMove={(e) => setSweepX(e.evt.offsetX)}
+              onDragMove={(e: MouseOrTouchEvent) => {
+                if (!e?.evt?.target) return;
+                var rect = e.evt.target.getBoundingClientRect();
+                var bodyRect = document.body.getBoundingClientRect();
+
+                const screenX = e.evt.targetTouches
+                  ? e.evt.targetTouches[0].pageX
+                  : e.evt.clientX;
+                const x = screenX - rect.left - bodyRect.left;
+
+                setSweepX(x);
+              }}
             >
               <CanvasVector
                 stroke={"#576180"}
