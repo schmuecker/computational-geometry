@@ -35,7 +35,7 @@ export interface IsoSweepResult {
   events: Event[];
 }
 
-function isoSweep(segments: Vector[], maxY: number): IsoSweepResult {
+function isoSweep(segments: Vector[]): IsoSweepResult {
   /* Put start points left of end points */
   const parsedSegments = segments.map((segment) => {
     const shouldSwap = segment.b.x < segment.a.x || segment.b.y < segment.a.y;
