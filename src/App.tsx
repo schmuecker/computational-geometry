@@ -22,6 +22,12 @@ function App() {
       icon: PauseIcon,
       current: pathname === "/sweep-line",
     },
+    {
+      name: "Newton's Method ",
+      href: "/newtons-method",
+      icon: PauseIcon,
+      current: pathname === "/newtons-method",
+    },
   ];
 
   return <RootLayout links={links} />;
