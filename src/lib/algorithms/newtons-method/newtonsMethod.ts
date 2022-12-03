@@ -1,10 +1,9 @@
-import { Point } from "../../geometry";
-
 interface newtonsMethodArgs {
   fn: (x: number) => number;
   dfn: (x: number) => number;
   startX: number;
   maxIter: number;
+  accuracy: number;
   damping: boolean;
 }
 
@@ -13,6 +12,7 @@ function newtonsMethod({
   dfn,
   startX,
   maxIter,
+  accuracy,
   damping,
 }: newtonsMethodArgs): number[] {
   const approxRootList = [];
@@ -29,6 +29,11 @@ function newtonsMethod({
     // -c/m = x
     const approxRoot = -c / m;
     approxRootList.push(approxRoot);
+
+    // quit loop if accuracy is achieved
+    // if (Math.abs(approxRoot) < accuracy) {
+    //   break;
+    // }
     x = approxRoot;
   }
   return approxRootList;

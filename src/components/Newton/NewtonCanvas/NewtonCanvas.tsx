@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { newtonsMethod } from "../../../lib/algorithms/newtons-method/newtonsMethod";
 import {
   Mafs,
@@ -19,29 +19,37 @@ interface NewtonCanvasProps {
 
 function NewtonCanvas({ mathFunction, derivitive }: NewtonCanvasProps) {
   const [approxRoots, setApproxRoots] = useState<number[]>([]);
+  useEffect(() => {
+    setApproxRoots([]);
+    startingPoint.setPoint([0, 0]);
+  }, [mathFunction]);
 
-  const startingPoint = useMovablePoint([0, mathFunction(0)], {
+  const startingPoint = useMovablePoint([0, 0], {
     constrain: ([x, _y]) => {
-      setApproxRoots(
-        newtonsMethod({
-          fn: mathFunction,
-          dfn: derivitive,
-          startX: x,
-          maxIter: 10,
-          damping: false,
-        })
-      );
+      if (x != 0) {
+        setApproxRoots(
+          newtonsMethod({
+            fn: mathFunction,
+            dfn: derivitive,
+            startX: x,
+            maxIter: 10,
+            accuracy: 0.5,
+            damping: false,
+          })
+        );
+      }
       //return [x, mathFunction(x)];
       return [x, 0];
     },
   });
 
   return (
-    <Mafs yAxisExtent={[-2, 10]} xAxisExtent={[-15, 15]}>
+    <Mafs yAxisExtent={[-2, 10]} xAxisExtent={[-10, 10]}>
       <CartesianCoordinates subdivisions={4} />
       <FunctionGraph.OfX y={(x) => mathFunction(x)} />
       {startingPoint.element}
-      {approxRoots ? (
+
+      {approxRoots[0] ? (
         <>
           <CustomLine
             point1={startingPoint.point}
@@ -55,7 +63,6 @@ function NewtonCanvas({ mathFunction, derivitive }: NewtonCanvasProps) {
             y={mathFunction(startingPoint.point[0])}
             color={Theme.pink}
           />
-          ;
           <CustomLine
             point1={[
               startingPoint.point[0],
@@ -65,38 +72,46 @@ function NewtonCanvas({ mathFunction, derivitive }: NewtonCanvasProps) {
           />
         </>
       ) : (
-        ""
+        <Point
+          x={startingPoint.point[0]}
+          y={startingPoint.point[1]}
+          color={Theme.pink}
+        />
       )}
       {approxRoots.map((approxRoot, index, elements) => {
-        return (
-          <>
-            <Point key={approxRoot} x={approxRoot} y={0} color={Theme.pink} />;
+        const elementList = [
+          <Point key={index + "1"} x={approxRoot} y={0} color={Theme.pink} />,
+          <CustomLine
+            key={index + "2"}
+            point1={[approxRoot, 0]}
+            point2={[approxRoot, mathFunction(approxRoot)]}
+          />,
+          <Point
+            key={index + "3"}
+            x={approxRoot}
+            y={mathFunction(approxRoot)}
+            color={Theme.pink}
+          />,
+        ];
+
+        if (elements[index + 1] != null) {
+          elementList.push(
             <CustomLine
-              point1={[approxRoot, 0]}
-              point2={[approxRoot, mathFunction(approxRoot)]}
+              key={index + "4"}
+              point1={[approxRoot, mathFunction(approxRoot)]}
+              point2={[elements[index + 1], 0]}
             />
-            <Point
-              x={approxRoot}
-              y={mathFunction(approxRoot)}
-              color={Theme.pink}
-            />
-            ;
-            {elements[index + 1] ? (
-              <CustomLine
-                point1={[approxRoot, mathFunction(approxRoot)]}
-                point2={[elements[index + 1], 0]}
-              />
-            ) : (
-              // <Line.ThroughPoints
-              //   point1={[approxRoot, mathFunction(approxRoot)]}
-              //   point2={[elements[index + 1], 0]}
-              //   color={Theme.pink}
-              //   weight={1}
-              // />
-              ""
-            )}
-          </>
-        );
+            // Tangenten anstatt von Verbindunslinien
+            // <Line.ThroughPoints
+            //   point1={[approxRoot, mathFunction(approxRoot)]}
+            //   point2={[elements[index + 1], 0]}
+            //   color={Theme.pink}
+            //   weight={1}
+            // />
+          );
+        }
+
+        return elementList;
       })}
     </Mafs>
   );
