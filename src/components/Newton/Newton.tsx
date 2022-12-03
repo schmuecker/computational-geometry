@@ -40,19 +40,11 @@ const functionOptions: Option[] = [
 
 export const Newton = () => {
   const [fnId, setFnId] = useState<Option["id"]>(() => functionOptions[0].id);
+  const [accuracy, setAccuracy] = useState<number>(0.01);
 
   let activeFunction: func;
-  if (fnId === "1") {
-    activeFunction = functions[0];
-  }
-  if (fnId === "2") {
-    activeFunction = functions[1];
-  }
-  if (fnId === "3") {
-    activeFunction = functions[2];
-  }
-  if (fnId === "4") {
-    activeFunction = functions[3];
+  if (fnId) {
+    activeFunction = functions[parseInt(fnId) - 1];
   } else {
     activeFunction = functions[0];
   }
@@ -61,21 +53,36 @@ export const Newton = () => {
     setFnId(id);
   };
 
+  const handleAccuracyChange = (value: number) => {
+    if (isNaN(value)) {
+      return;
+    }
+    setAccuracy(value);
+  };
   return (
     <div>
       <div className="mb-8 flex w-full items-end justify-between">
         <RadioGroup
-          title="Algorithm"
-          subtitle="Choose the algorithm you prefer"
+          title="Functions"
+          subtitle="Choose a function"
           options={functionOptions}
           checkedOption={fnId}
           onChange={handleFuncChanged}
         />
       </div>
+      <input
+        type="number"
+        step="0.01"
+        id="accuracy"
+        value={accuracy}
+        onChange={(e) => handleAccuracyChange(e.target.valueAsNumber)}
+      ></input>
       <NewtonCanvas
         mathFunction={(x) => activeFunction.fn(x)}
         derivitive={(x) => activeFunction.dfn(x)}
+        accuracy={accuracy}
       ></NewtonCanvas>
+      <div>Approx Root {}</div>
     </div>
   );
 };

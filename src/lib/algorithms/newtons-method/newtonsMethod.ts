@@ -31,9 +31,9 @@ function newtonsMethod({
     approxRootList.push(approxRoot);
 
     // quit loop if accuracy is achieved
-    // if (Math.abs(approxRoot) < accuracy) {
-    //   break;
-    // }
+    if (Math.abs(fn(approxRoot)) < accuracy) {
+      break;
+    }
     x = approxRoot;
   }
   return approxRootList;

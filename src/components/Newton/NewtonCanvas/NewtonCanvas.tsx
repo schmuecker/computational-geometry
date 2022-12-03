@@ -7,7 +7,6 @@ import {
   useMovablePoint,
   Point,
   Line,
-  Vector2,
   SegmentProps,
   Theme,
 } from "mafs";
@@ -15,9 +14,14 @@ import {
 interface NewtonCanvasProps {
   mathFunction: (x: number) => number;
   derivitive: (x: number) => number;
+  accuracy: number;
 }
 
-function NewtonCanvas({ mathFunction, derivitive }: NewtonCanvasProps) {
+function NewtonCanvas({
+  mathFunction,
+  derivitive,
+  accuracy,
+}: NewtonCanvasProps) {
   const [approxRoots, setApproxRoots] = useState<number[]>([]);
   useEffect(() => {
     setApproxRoots([]);
@@ -33,7 +37,7 @@ function NewtonCanvas({ mathFunction, derivitive }: NewtonCanvasProps) {
             dfn: derivitive,
             startX: x,
             maxIter: 10,
-            accuracy: 0.5,
+            accuracy: accuracy,
             damping: false,
           })
         );
@@ -44,7 +48,7 @@ function NewtonCanvas({ mathFunction, derivitive }: NewtonCanvasProps) {
   });
 
   return (
-    <Mafs yAxisExtent={[-2, 10]} xAxisExtent={[-10, 10]}>
+    <Mafs yAxisExtent={[-15, 15]} xAxisExtent={[-15, 15]}>
       <CartesianCoordinates subdivisions={4} />
       <FunctionGraph.OfX y={(x) => mathFunction(x)} />
       {startingPoint.element}

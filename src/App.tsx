@@ -1,4 +1,4 @@
-import { CubeIcon, PauseIcon } from "@heroicons/react/24/outline";
+import { CubeIcon, PauseIcon, VariableIcon } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
@@ -25,7 +25,7 @@ function App() {
     {
       name: "Newton's Method ",
       href: "/newtons-method",
-      icon: PauseIcon,
+      icon: VariableIcon,
       current: pathname === "/newtons-method",
     },
   ];
