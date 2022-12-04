@@ -9,6 +9,7 @@ import {
   Line,
   SegmentProps,
   Theme,
+  ThroughPointsProps,
 } from "mafs";
 
 interface NewtonCanvasProps {
@@ -45,88 +46,125 @@ function NewtonCanvas({
       //return [x, mathFunction(x)];
       return [x, 0];
     },
+    color: Theme.foreground,
   });
 
   return (
-    <Mafs yAxisExtent={[-15, 15]} xAxisExtent={[-15, 15]}>
-      <CartesianCoordinates subdivisions={4} />
-      <FunctionGraph.OfX y={(x) => mathFunction(x)} />
-      {startingPoint.element}
+    <div className="relative">
+      <Mafs yAxisExtent={[-15, 15]} xAxisExtent={[-15, 15]}>
+        <CartesianCoordinates subdivisions={4} />
+        <FunctionGraph.OfX y={(x) => mathFunction(x)} weight={4} />
 
-      {approxRoots[0] ? (
-        <>
-          <CustomLine
-            point1={startingPoint.point}
-            point2={[
-              startingPoint.point[0],
-              mathFunction(startingPoint.point[0]),
-            ]}
-          />
-          <Point
-            x={startingPoint.point[0]}
-            y={mathFunction(startingPoint.point[0])}
-            color={Theme.pink}
-          />
-          <CustomLine
-            point1={[
-              startingPoint.point[0],
-              mathFunction(startingPoint.point[0]),
-            ]}
-            point2={[approxRoots[0], 0]}
-          />
-        </>
-      ) : (
-        <Point
-          x={startingPoint.point[0]}
-          y={startingPoint.point[1]}
-          color={Theme.pink}
-        />
-      )}
-      {approxRoots.map((approxRoot, index, elements) => {
-        const elementList = [
-          <Point key={index + "1"} x={approxRoot} y={0} color={Theme.pink} />,
-          <CustomLine
-            key={index + "2"}
-            point1={[approxRoot, 0]}
-            point2={[approxRoot, mathFunction(approxRoot)]}
-          />,
-          <Point
-            key={index + "3"}
-            x={approxRoot}
-            y={mathFunction(approxRoot)}
-            color={Theme.pink}
-          />,
-        ];
-
-        if (elements[index + 1] != null) {
-          elementList.push(
-            <CustomLine
-              key={index + "4"}
-              point1={[approxRoot, mathFunction(approxRoot)]}
-              point2={[elements[index + 1], 0]}
+        {approxRoots[0] ? (
+          <>
+            <CustomSegment
+              point1={startingPoint.point}
+              point2={[
+                startingPoint.point[0],
+                mathFunction(startingPoint.point[0]),
+              ]}
             />
-            // Tangenten anstatt von Verbindunslinien
-            // <Line.ThroughPoints
-            //   point1={[approxRoot, mathFunction(approxRoot)]}
-            //   point2={[elements[index + 1], 0]}
-            //   color={Theme.pink}
-            //   weight={1}
-            // />
-          );
-        }
+            <Point
+              x={startingPoint.point[0]}
+              y={mathFunction(startingPoint.point[0])}
+              color={Theme.red}
+            />
+            <CustomSegment
+              point1={[
+                startingPoint.point[0],
+                mathFunction(startingPoint.point[0]),
+              ]}
+              point2={[approxRoots[0], 0]}
+            />
+            <CustomTangent
+              point1={[
+                startingPoint.point[0],
+                mathFunction(startingPoint.point[0]),
+              ]}
+              point2={[approxRoots[0], 0]}
+            />
+          </>
+        ) : (
+          ""
+        )}
+        {approxRoots.map((approxRoot, index, elements) => {
+          const elementList = [];
 
-        return elementList;
-      })}
-    </Mafs>
+          if (elements[index + 1] != null) {
+            elementList.push(
+              <CustomSegment
+                key={"tangent" + index}
+                point1={[approxRoot, mathFunction(approxRoot)]}
+                point2={[elements[index + 1], 0]}
+              />,
+              <CustomTangent
+                key={"tangentFade" + index}
+                point1={[approxRoot, mathFunction(approxRoot)]}
+                point2={[elements[index + 1], 0]}
+              />,
+              <CustomSegment
+                key={"Line" + index}
+                point1={[approxRoot, 0]}
+                point2={[approxRoot, mathFunction(approxRoot)]}
+              />,
+              <Point
+                key={"Point" + index}
+                x={approxRoot}
+                y={mathFunction(approxRoot)}
+                color={Theme.red}
+              />,
+              <Point
+                key={"approx" + index}
+                x={approxRoot}
+                y={0}
+                color={Theme.red}
+              />
+            );
+          } else {
+            elementList.push(
+              <Point
+                key={"root" + index}
+                x={approxRoot}
+                y={0}
+                color={Theme.green}
+              />
+            );
+          }
+          return elementList;
+        })}
+        {startingPoint.element}
+      </Mafs>
+      <div className="absolute top-1 right-1 rounded bg-slate-50 px-2">
+        <div>
+          Root: {`(`}
+          {approxRoots[0]
+            ? approxRoots.pop()?.toFixed(2)
+            : startingPoint.point[0].toFixed(2)}
+          {`,0)`}
+        </div>
+        <div>Steps: {approxRoots.length}</div>
+      </div>
+    </div>
   );
 }
 
-const CustomLine = ({ point1, point2 }: SegmentProps) => {
+const CustomSegment = ({ point1, point2 }: SegmentProps) => {
   return (
     <Line.Segment
       point1={point1}
       point2={point2}
-      color={Theme.pink}
+      color={Theme.red}
+      weight={2}
+    />
+  );
+};
+const CustomTangent = ({ point1, point2 }: ThroughPointsProps) => {
+  return (
+    <Line.ThroughPoints
+      point1={point1}
+      point2={point2}
+      color={Theme.red}
+      opacity={0.5}
       weight={1}
     />
   );

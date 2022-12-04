@@ -82,7 +82,6 @@ export const Newton = () => {
         derivitive={(x) => activeFunction.dfn(x)}
         accuracy={accuracy}
       ></NewtonCanvas>
-      <div>Approx Root {}</div>
     </div>
   );
 };
