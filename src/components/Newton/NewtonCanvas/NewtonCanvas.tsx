@@ -10,6 +10,7 @@ import {
   SegmentProps,
   Theme,
   ThroughPointsProps,
+  MafsViewProps,
 } from "mafs";
 
 interface NewtonCanvasProps {
@@ -53,7 +54,7 @@ function NewtonCanvas({
 
   return (
     <div className="relative">
-      <Mafs yAxisExtent={[-15, 15]} xAxisExtent={[-10, 10]}>
+      <MafsWrapper yAxisExtent={[-15, 15]} xAxisExtent={[-10, 10]}>
         <CartesianCoordinates />
         <FunctionGraph.OfX y={(x) => mathFunction(x)} weight={4} />
         {approxRoots[0] ? (
@@ -134,7 +135,7 @@ function NewtonCanvas({
           return elementList;
         })}
         {startingPoint.element}
-      </Mafs>
+      </MafsWrapper>
       <div className="absolute top-2 right-2 w-32 rounded bg-white/80 px-2 py-1">
         <div>
           Root: {"("}
@@ -169,6 +170,14 @@ const CustomTangent = ({ point1, point2 }: ThroughPointsProps) => {
       weight={1}
     />
   );
+};
+
+interface MafsWrapperProps {
+  children: React.ReactNode;
+}
+
+const MafsWrapper = (props: MafsViewProps & MafsWrapperProps) => {
+  return <Mafs {...props}></Mafs>;
 };
 
 export default NewtonCanvas;
