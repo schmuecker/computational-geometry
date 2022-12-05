@@ -2,8 +2,9 @@ import { createBrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import ConvexHull from "./components/ConvexHull/ConvexHull";
-import { Newton } from "./components/Newton/Newton";
+import Newton from "./components/Newton/Newton";
 import SweepingLines from "./components/SweepLine/SweepLine";
+import TwoDTrees from "./components/TwoDTrees/TwoDTrees";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/newtons-method",
         element: <Newton />,
+      },
+      {
+        path: "/2d-trees",
+        element: <TwoDTrees />,
       },
     ],
   },

@@ -29,6 +29,12 @@ function App() {
       current: pathname === "/newtons-method",
       hardRefresh: true,
     },
+    {
+      name: "2D-Trees ",
+      href: "/2d-trees",
+      icon: VariableIcon,
+      current: pathname === "/2d-trees",
+    },
   ];
 
   return <RootLayout links={links} />;
