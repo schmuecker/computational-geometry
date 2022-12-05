@@ -2,7 +2,7 @@ import {
   CubeIcon,
   PauseIcon,
   VariableIcon,
-  MapIcon,
+  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
@@ -37,7 +37,7 @@ function App() {
     {
       name: "2D-Trees ",
       href: "/2d-trees",
-      icon: MapIcon,
+      icon: QrCodeIcon,
       current: pathname === "/2d-trees",
     },
   ];
