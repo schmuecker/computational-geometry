@@ -1,4 +1,4 @@
-import { CubeIcon, PauseIcon } from "@heroicons/react/24/outline";
+import { CubeIcon, PauseIcon, VariableIcon } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
@@ -21,6 +21,13 @@ function App() {
       href: "/sweep-line",
       icon: PauseIcon,
       current: pathname === "/sweep-line",
+    },
+    {
+      name: "Newton's Method ",
+      href: "/newtons-method",
+      icon: VariableIcon,
+      current: pathname === "/newtons-method",
+      hardRefresh: true,
     },
   ];
 

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Fragment, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { Link as LinkType } from "../../types/Link";
+import A from "./A/A";
 
 interface LayoutProps {
   links: LinkType[];
@@ -34,32 +35,36 @@ function RootLayout({ links }: LayoutProps) {
               <CubeTransparentIcon className="h-8 w-auto text-ebony-100" />
             </div>
             <div className="mt-6 w-full flex-1 space-y-1 px-2">
-              {links.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={clsx(
-                    item.current
-                      ? "bg-portage-400/50 text-white"
-                      : "text-blue-100 hover:bg-white/5 hover:text-white",
-                    "group flex w-full flex-col items-center rounded-md p-3 text-xs font-medium"
-                  )}
-                  aria-current={item.current ? "page" : undefined}
-                >
-                  <item.icon
+              {links.map((item) => {
+                const LinkComponent = item.hardRefresh ? A : Link;
+                return (
+                  <LinkComponent
+                    key={item.name}
+                    to={item.href}
+                    href={item.href}
                     className={clsx(
                       item.current
-                        ? "text-white"
-                        : "text-ebony-300 group-hover:text-ebony-100 ",
-                      "h-6 w-6 transition"
+                        ? "bg-portage-400/50 text-white"
+                        : "text-blue-100 hover:bg-white/5 hover:text-white",
+                      "group flex w-full flex-col items-center rounded-md p-3 text-xs font-medium"
                     )}
-                    aria-hidden="true"
-                  />
-                  <span className="mt-2 text-center font-mono">
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
+                    aria-current={item.current ? "page" : undefined}
+                  >
+                    <item.icon
+                      className={clsx(
+                        item.current
+                          ? "text-white"
+                          : "text-ebony-300 group-hover:text-ebony-100 ",
+                        "h-6 w-6 transition"
+                      )}
+                      aria-hidden="true"
+                    />
+                    <span className="mt-2 text-center font-mono">
+                      {item.name}
+                    </span>
+                  </LinkComponent>
+                );
+              })}
             </div>
           </div>
         </div>
