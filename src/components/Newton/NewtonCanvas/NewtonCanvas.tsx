@@ -16,12 +16,14 @@ interface NewtonCanvasProps {
   mathFunction: (x: number) => number;
   derivitive: (x: number) => number;
   accuracy: number;
+  maxIter: number;
 }
 
 function NewtonCanvas({
   mathFunction,
   derivitive,
   accuracy,
+  maxIter,
 }: NewtonCanvasProps) {
   const [approxRoots, setApproxRoots] = useState<number[]>([]);
   useEffect(() => {
@@ -37,7 +39,7 @@ function NewtonCanvas({
             fn: mathFunction,
             dfn: derivitive,
             startX: x,
-            maxIter: 10,
+            maxIter: maxIter,
             accuracy: accuracy,
             damping: false,
           })
@@ -51,10 +53,9 @@ function NewtonCanvas({
 
   return (
     <div className="relative">
-      <Mafs yAxisExtent={[-15, 15]} xAxisExtent={[-15, 15]}>
-        <CartesianCoordinates subdivisions={4} />
+      <Mafs yAxisExtent={[-15, 15]} xAxisExtent={[-10, 10]}>
+        <CartesianCoordinates />
         <FunctionGraph.OfX y={(x) => mathFunction(x)} weight={4} />
-
         {approxRoots[0] ? (
           <>
             <CustomSegment
@@ -136,11 +137,11 @@ function NewtonCanvas({
       </Mafs>
       <div className="absolute top-1 right-1 rounded bg-slate-50 px-2">
         <div>
-          Root: {`(`}
+          Root: {"("}
           {approxRoots[0]
             ? approxRoots.pop()?.toFixed(2)
             : startingPoint.point[0].toFixed(2)}
-          {`,0)`}
+          {",0)"}
         </div>
         <div>Steps: {approxRoots.length}</div>
       </div>

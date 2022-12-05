@@ -41,6 +41,7 @@ const functionOptions: Option[] = [
 export const Newton = () => {
   const [fnId, setFnId] = useState<Option["id"]>(() => functionOptions[0].id);
   const [accuracy, setAccuracy] = useState<number>(0.01);
+  const [maxIter, setMaxIter] = useState<number>(10);
 
   let activeFunction: func;
   if (fnId) {
@@ -59,6 +60,14 @@ export const Newton = () => {
     }
     setAccuracy(value);
   };
+
+  const handleMaxIterChange = (value: number) => {
+    if (isNaN(value)) {
+      return;
+    }
+    setMaxIter(value);
+  };
+
   return (
     <div>
       <div className="mb-8 flex w-full items-end justify-between">
@@ -76,12 +85,20 @@ export const Newton = () => {
         id="accuracy"
         value={accuracy}
         onChange={(e) => handleAccuracyChange(e.target.valueAsNumber)}
-      ></input>
+      />
+      <input
+        type="number"
+        step="1"
+        id="maxIter"
+        value={maxIter}
+        onChange={(e) => handleMaxIterChange(e.target.valueAsNumber)}
+      />
       <NewtonCanvas
         mathFunction={(x) => activeFunction.fn(x)}
         derivitive={(x) => activeFunction.dfn(x)}
         accuracy={accuracy}
-      ></NewtonCanvas>
+        maxIter={maxIter}
+      />
     </div>
   );
 };
