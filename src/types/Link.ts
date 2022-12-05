@@ -6,4 +6,5 @@ export interface Link {
   href: Path;
   current: boolean;
   icon: HeroIcon;
+  hardRefresh?: boolean;
 }

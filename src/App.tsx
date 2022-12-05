@@ -27,6 +27,7 @@ function App() {
       href: "/newtons-method",
       icon: VariableIcon,
       current: pathname === "/newtons-method",
+      hardRefresh: true,
     },
   ];
 
