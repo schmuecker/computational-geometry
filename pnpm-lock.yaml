@@ -16,6 +16,7 @@ specifiers:
   eslint-config-prettier: ^8.5.0
   eslint-plugin-import: ^2.26.0
   eslint-plugin-react: ^7.31.11
+  immer: ^9.0.16
   konva: ^8.3.13
   localforage: ^1.10.0
   mafs: ^0.6.1
@@ -39,6 +40,7 @@ dependencies:
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.2
   avl: 1.5.3
   clsx: 1.2.1
+  immer: 9.0.16
   konva: 8.3.13
   localforage: 1.10.0
   mafs: 0.6.1_biqbaboplfbrettd7655fr4n2y
@@ -1763,6 +1765,10 @@ packages:
 
   /immediate/3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
+    dev: false
+
+  /immer/9.0.16:
+    resolution: {integrity: sha512-qenGE7CstVm1NrHQbMh8YaSzTZTFNP3zPqr3YU0S0UY441j4bJTg4A2Hh5KAhwgaiU6ZZ1Ar6y/2f4TblnMReQ==}
     dev: false
 
   /import-fresh/3.3.0:
