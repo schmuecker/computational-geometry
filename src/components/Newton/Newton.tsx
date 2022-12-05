@@ -79,20 +79,28 @@ export const Newton = () => {
           onChange={handleFuncChanged}
         />
       </div>
-      <input
-        type="number"
-        step="0.01"
-        id="accuracy"
-        value={accuracy}
-        onChange={(e) => handleAccuracyChange(e.target.valueAsNumber)}
-      />
-      <input
-        type="number"
-        step="1"
-        id="maxIter"
-        value={maxIter}
-        onChange={(e) => handleMaxIterChange(e.target.valueAsNumber)}
-      />
+      <div className="mb-8 flex flex-row">
+        <div>
+          <p>Accuracy</p>
+          <input
+            type="number"
+            step="0.01"
+            id="accuracy"
+            value={accuracy}
+            onChange={(e) => handleAccuracyChange(e.target.valueAsNumber)}
+          />
+        </div>
+        <div>
+          <p>Max Iteration</p>
+          <input
+            type="number"
+            step="1"
+            id="maxIter"
+            value={maxIter}
+            onChange={(e) => handleMaxIterChange(e.target.valueAsNumber)}
+          />
+        </div>
+      </div>
       <NewtonCanvas
         mathFunction={(x) => activeFunction.fn(x)}
         derivitive={(x) => activeFunction.dfn(x)}

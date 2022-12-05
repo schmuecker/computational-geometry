@@ -135,7 +135,7 @@ function NewtonCanvas({
         })}
         {startingPoint.element}
       </Mafs>
-      <div className="absolute top-1 right-1 rounded bg-slate-50 px-2">
+      <div className="absolute top-2 right-2 w-32 rounded bg-white/80 px-2 py-1">
         <div>
           Root: {"("}
           {approxRoots[0]
