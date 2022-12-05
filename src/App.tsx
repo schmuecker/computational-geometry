@@ -1,4 +1,9 @@
-import { CubeIcon, PauseIcon, VariableIcon } from "@heroicons/react/24/outline";
+import {
+  CubeIcon,
+  PauseIcon,
+  VariableIcon,
+  MapIcon,
+} from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
@@ -32,7 +37,7 @@ function App() {
     {
       name: "2D-Trees ",
       href: "/2d-trees",
-      icon: VariableIcon,
+      icon: MapIcon,
       current: pathname === "/2d-trees",
     },
   ];

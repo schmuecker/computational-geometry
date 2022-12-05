@@ -1,5 +1,7 @@
+import TwoDTreesCanvas from "./TwoDTreesCanvas/TwoDTreesCanvas";
+
 const TwoDTrees = () => {
-  return <div>TwoDTrees</div>;
+  return <TwoDTreesCanvas />;
 };
 
 export default TwoDTrees;
