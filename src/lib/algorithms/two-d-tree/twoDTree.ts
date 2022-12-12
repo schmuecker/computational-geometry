@@ -1,24 +1,21 @@
 // Pseudo Code from : https://www.youtube.com/watch?v=G84XQfP4FTU :)
-import { Node as NodeType } from "tree-model/types";
-import Tree, { Node } from "tree-model";
-import { produce } from "immer";
+import TreeModel, { Node as NodeType } from "tree-model/types";
+import Tree from "tree-model";
+import { klona } from "klona";
 import { Point } from "../../geometry";
 
 type Knot = NodeType<Point>;
 
-const sortPoints = (points: Point[], coordinate: "x" | "y") => {
-  const sortedPoints = produce(points, (draft) => {
-    draft.sort((a, b) => {
-      if (a[coordinate] >= b[coordinate]) {
-        return 1;
-      }
-      if (a[coordinate] < b[coordinate]) {
-        return -1;
-      }
-      return 0;
-    });
+const sortPointsInPlace = (points: Point[], coordinate: "x" | "y") => {
+  points.sort((a, b) => {
+    if (a[coordinate] >= b[coordinate]) {
+      return 1;
+    }
+    if (a[coordinate] < b[coordinate]) {
+      return -1;
+    }
+    return 0;
   });
-  return sortedPoints;
 };
 
 const getMedian = (points: Point[]) => {
@@ -29,14 +26,20 @@ const getMedian = (points: Point[]) => {
 class TwoDTree {
   pointsX: Point[] = [];
   pointsY: Point[] = [];
+  tree: TreeModel;
 
   constructor(points: Point[]) {
-    this.pointsX = sortPoints(points, "x");
-    this.pointsY = sortPoints(points, "y");
+    this.pointsX = klona(points);
+    this.pointsY = klona(points);
+    sortPointsInPlace(this.pointsX, "x");
+    sortPointsInPlace(this.pointsY, "y");
+    const { pointsX, pointsY } = this;
+    console.log(pointsX, pointsY);
     const medianPoint = getMedian(this.pointsX);
-    const tree = new Tree();
-    const rootNode = tree.parse({ key: medianPoint.id, value: medianPoint });
-    this.build2DTree(0, points.length, rootNode, "ver");
+    this.tree = new Tree();
+    const rootNode = this.tree.parse(medianPoint);
+    this.build2DTree(0, points.length - 1, rootNode, "ver");
+    console.log("Done.", rootNode);
   }
 
   partitionField(
@@ -68,22 +71,22 @@ class TwoDTree {
       }
       if (pointCoord === medianCoord) {
         if (multipleCoords) {
+          console.error("Second duplicate found.", points);
           console.error("Warning: multiple X/Y coordinates");
         }
+        console.log("First duplicate found", points);
         multipleCoords = true;
       }
     }
     // Update median point
-    points[medianIdx].x = medianPoint.x;
-    points[medianIdx].y = medianPoint.y;
+    console.log("Update median point", points[medianIdx]);
+    points[medianIdx] = medianPoint;
     // Copy back temporary list
     for (let i = 0; i < tmpPoints1.length; i++) {
-      points[leftIdx + i].x = tmpPoints1[i].x;
-      points[leftIdx + i].y = tmpPoints1[i].y;
+      points[leftIdx + i] = tmpPoints1[i];
     }
     for (let i = 0; i < tmpPoints2.length; i++) {
-      points[medianIdx + i + 1].x = tmpPoints2[i].x;
-      points[medianIdx + i + 1].y = tmpPoints2[i].y;
+      points[medianIdx + i + 1] = tmpPoints2[i];
     }
   }
 
@@ -93,10 +96,15 @@ class TwoDTree {
     knot: Knot,
     direction: "hor" | "ver"
   ) {
+    console.log({ leftIdx, rightIdx, knot, direction });
     if (leftIdx <= rightIdx) {
       const medianIdx = Math.floor((leftIdx + rightIdx) / 2);
+      console.log({ medianIdx });
       if (direction === "ver") {
-        knot.model = this.pointsX[medianIdx];
+        console.log("| Vertical |");
+        console.log("Knot is", { ...knot });
+        const medianPoint = this.pointsX[medianIdx];
+        knot.model = medianPoint;
         this.partitionField(
           this.pointsY,
           leftIdx,
@@ -105,7 +113,10 @@ class TwoDTree {
           direction
         );
       } else {
-        knot.model = this.pointsY[medianIdx];
+        console.log("- Horizontal -");
+        console.log("Knot is", { ...knot });
+        const medianPoint = this.pointsY[medianIdx];
+        knot.model = medianPoint;
         this.partitionField(
           this.pointsX,
           leftIdx,
@@ -114,22 +125,20 @@ class TwoDTree {
           direction
         );
       }
+      if (leftIdx === medianIdx) {
+        return console.log("Done -> left index = median index");
+      }
       const leftPoint = new Point(0, 0);
       const rightPoint = new Point(0, 0);
-      const leftNode = new Node(undefined, {
-        key: leftPoint.id,
-        value: leftPoint,
-      });
-      const rightNode = new Node(undefined, {
-        key: rightPoint.id,
-        value: rightPoint,
-      });
+      const leftNode = this.tree.parse(leftPoint);
+      const rightNode = this.tree.parse(rightPoint);
       knot.addChild(leftNode);
       knot.addChild(rightNode);
-      console.log({ knot });
       const invertedDirection = direction === "hor" ? "ver" : "hor";
-      // build2DTree(leftIdx, medianIdx - 1, knot.left, invertedDirection);
-      // build2DTree(medianIdx + 1, rightIdx, knot.right, invertedDirection);
+      console.log({ parentNode: knot, leftIdx, medianIdx });
+      this.build2DTree(leftIdx, medianIdx - 1, leftNode, invertedDirection);
+      console.log({ medianIdx, rightIdx });
+      this.build2DTree(medianIdx + 1, rightIdx, rightNode, invertedDirection);
     }
     // if (points.length === 1) {
     //   // retun leaf storing the pt in P
