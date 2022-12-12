@@ -26,17 +26,21 @@ const getMedian = (points: Point[]) => {
 class TwoDTree {
   pointsX: Point[] = [];
   pointsY: Point[] = [];
-  tree: TreeModel;
+  tree: TreeModel = new Tree();
+  rootNode: Knot | undefined;
 
   constructor(points: Point[]) {
+    if (points.length === 0) {
+      return;
+    }
     this.pointsX = klona(points);
     this.pointsY = klona(points);
     sortPointsInPlace(this.pointsX, "x");
     sortPointsInPlace(this.pointsY, "y");
     const medianPoint = getMedian(this.pointsX);
-    this.tree = new Tree();
-    const rootNode = this.tree.parse(medianPoint);
-    this.build2DTree(0, points.length - 1, "ver", rootNode);
+    this.rootNode = this.tree.parse(medianPoint);
+    this.build2DTree(0, points.length - 1, "ver", this.rootNode, undefined);
+    console.log("Built tree.", this.rootNode);
   }
 
   partitionField(
@@ -116,6 +120,7 @@ class TwoDTree {
         );
       }
       if (parentKnot) {
+        console.log("add", knot, "to", parentKnot);
         parentKnot.addChild(knot);
       }
       const invertedDirection = direction === "hor" ? "ver" : "hor";
@@ -124,14 +129,14 @@ class TwoDTree {
         medianIdx - 1,
         invertedDirection,
         undefined,
-        knot
+        !parentKnot ? this.rootNode : knot
       );
       this.build2DTree(
         medianIdx + 1,
         rightIdx,
         invertedDirection,
         undefined,
-        knot
+        !parentKnot ? this.rootNode : knot
       );
     }
     // if (points.length === 1) {
