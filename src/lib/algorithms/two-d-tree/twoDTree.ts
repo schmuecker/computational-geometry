@@ -33,13 +33,10 @@ class TwoDTree {
     this.pointsY = klona(points);
     sortPointsInPlace(this.pointsX, "x");
     sortPointsInPlace(this.pointsY, "y");
-    const { pointsX, pointsY } = this;
-    console.log(pointsX, pointsY);
     const medianPoint = getMedian(this.pointsX);
     this.tree = new Tree();
     const rootNode = this.tree.parse(medianPoint);
-    this.build2DTree(0, points.length - 1, rootNode, "ver");
-    console.log("Done.", rootNode);
+    this.build2DTree(0, points.length - 1, "ver", rootNode);
   }
 
   partitionField(
@@ -74,12 +71,10 @@ class TwoDTree {
           console.error("Second duplicate found.", points);
           console.error("Warning: multiple X/Y coordinates");
         }
-        console.log("First duplicate found", points);
         multipleCoords = true;
       }
     }
     // Update median point
-    console.log("Update median point", points[medianIdx]);
     points[medianIdx] = medianPoint;
     // Copy back temporary list
     for (let i = 0; i < tmpPoints1.length; i++) {
@@ -93,18 +88,15 @@ class TwoDTree {
   build2DTree(
     leftIdx: number,
     rightIdx: number,
-    knot: Knot,
-    direction: "hor" | "ver"
+    direction: "hor" | "ver",
+    knot?: Knot,
+    parentKnot?: Knot
   ) {
-    console.log({ leftIdx, rightIdx, knot, direction });
     if (leftIdx <= rightIdx) {
       const medianIdx = Math.floor((leftIdx + rightIdx) / 2);
-      console.log({ medianIdx });
       if (direction === "ver") {
-        console.log("| Vertical |");
-        console.log("Knot is", { ...knot });
         const medianPoint = this.pointsX[medianIdx];
-        knot.model = medianPoint;
+        knot = this.tree.parse(medianPoint);
         this.partitionField(
           this.pointsY,
           leftIdx,
@@ -113,10 +105,8 @@ class TwoDTree {
           direction
         );
       } else {
-        console.log("- Horizontal -");
-        console.log("Knot is", { ...knot });
         const medianPoint = this.pointsY[medianIdx];
-        knot.model = medianPoint;
+        knot = this.tree.parse(medianPoint);
         this.partitionField(
           this.pointsX,
           leftIdx,
@@ -125,20 +115,24 @@ class TwoDTree {
           direction
         );
       }
-      if (leftIdx === medianIdx) {
-        return console.log("Done -> left index = median index");
+      if (parentKnot) {
+        parentKnot.addChild(knot);
       }
-      const leftPoint = new Point(0, 0);
-      const rightPoint = new Point(0, 0);
-      const leftNode = this.tree.parse(leftPoint);
-      const rightNode = this.tree.parse(rightPoint);
-      knot.addChild(leftNode);
-      knot.addChild(rightNode);
       const invertedDirection = direction === "hor" ? "ver" : "hor";
-      console.log({ parentNode: knot, leftIdx, medianIdx });
-      this.build2DTree(leftIdx, medianIdx - 1, leftNode, invertedDirection);
-      console.log({ medianIdx, rightIdx });
-      this.build2DTree(medianIdx + 1, rightIdx, rightNode, invertedDirection);
+      this.build2DTree(
+        leftIdx,
+        medianIdx - 1,
+        invertedDirection,
+        undefined,
+        knot
+      );
+      this.build2DTree(
+        medianIdx + 1,
+        rightIdx,
+        invertedDirection,
+        undefined,
+        knot
+      );
     }
     // if (points.length === 1) {
     //   // retun leaf storing the pt in P
