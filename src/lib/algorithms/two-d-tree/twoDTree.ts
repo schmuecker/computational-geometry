@@ -1,5 +1,6 @@
 // Pseudo Code from : https://www.youtube.com/watch?v=G84XQfP4FTU :)
-
+import { Node as NodeType } from "tree-model/types";
+import Tree, { Node } from "tree-model";
 import { produce } from "immer";
 import { Point } from "../../geometry";
 
@@ -18,38 +19,33 @@ const sortPoints = (points: Point[], coordinate: "x" | "y") => {
   return sortedPoints;
 };
 
-const getMedian = (points: Point[], alignment: "hor" | "ver") => {
-  let sortedPoints;
-  if (alignment === "hor") {
-    sortedPoints = sortPoints(points, "y");
-  } else {
-    sortedPoints = sortPoints(points, "x");
-  }
-
+const getMedian = (points: Point[]) => {
   const mid = Math.floor(points.length / 2);
-
   return points[mid];
 };
 
-const X: Point[] = [];
-const Y: Point[] = [];
-
 const partitionField = (
+  X: Point[],
+  Y: Point[],
   points: Point[],
   leftIdx: number,
   rightIdx: number,
   medianIdx: number,
   direction: "hor" | "ver"
 ) => {
+  console.log({ X, Y });
   let multipleCoords = false;
   const tmpPoints1: Point[] = [];
   const tmpPoints2: Point[] = [];
+  // When the direction is vertical, the x coordinate is used
   const coordKey = direction === "ver" ? "x" : "y";
+  // When the direction is vertical, the x list is used for partitioning
   const medianPoint = direction === "ver" ? X[medianIdx] : Y[medianIdx];
   // Partition the point list
   // (depends on direction)
-  for (let i = leftIdx; i <= rightIdx; i++) {
+  for (let i = leftIdx; i < rightIdx; i++) {
     const point = points[i];
+    console.log({ point });
     const pointCoord = point[coordKey];
     const medianCoord = medianPoint[coordKey];
     if (pointCoord < medianCoord) {
@@ -76,15 +72,11 @@ const partitionField = (
   }
 };
 
-type Knot = {
-  value: any;
-  direction: "ver" | "hor";
-  parent: Knot;
-  left: Knot;
-  right: Knot;
-};
+type Knot = NodeType<Point>;
 
 const build2DTree = (
+  X: Point[],
+  Y: Point[],
   leftIdx: number,
   rightIdx: number,
   knot: Knot,
@@ -93,12 +85,29 @@ const build2DTree = (
   if (leftIdx <= rightIdx) {
     const medianIdx = Math.floor((leftIdx + rightIdx) / 2);
     if (direction === "ver") {
-      knot.value = X[medianIdx];
-      partitionField(Y, leftIdx, rightIdx, medianIdx, direction);
+      knot.model = X[medianIdx];
+      partitionField(X, Y, Y, leftIdx, rightIdx, medianIdx, direction);
     } else {
-      knot.value = Y[medianIdx];
-      partitionField(X, leftIdx, rightIdx, medianIdx, direction);
+      knot.model = Y[medianIdx];
+      partitionField(X, Y, X, leftIdx, rightIdx, medianIdx, direction);
     }
+    const leftPoint = new Point(0, 0);
+    const rightPoint = new Point(0, 0);
+    const leftNode = new Node(undefined, {
+      key: leftPoint.id,
+      value: leftPoint,
+    });
+    console.log({ leftNode });
+    const rightNode = new Node(undefined, {
+      key: rightPoint.id,
+      value: rightPoint,
+    });
+    knot.addChild(leftNode);
+    knot.addChild(rightNode);
+    console.log({ knot });
+    const invertedDirection = direction === "hor" ? "ver" : "hor";
+    // build2DTree(leftIdx, medianIdx - 1, knot.left, invertedDirection);
+    // build2DTree(medianIdx + 1, rightIdx, knot.right, invertedDirection);
   }
   // if (points.length === 1) {
   //   // retun leaf storing the pt in P
@@ -124,7 +133,10 @@ class TwoDTree {
   constructor(points: Point[]) {
     this.pointsX = sortPoints(points, "x");
     this.pointsY = sortPoints(points, "y");
-    build2DTree(0, points.length);
+    const medianPoint = getMedian(this.pointsX);
+    const tree = new Tree();
+    const rootNode = tree.parse({ key: medianPoint.id, value: medianPoint });
+    build2DTree(this.pointsX, this.pointsY, 0, points.length, rootNode, "ver");
   }
 }
 
