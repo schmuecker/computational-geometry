@@ -29,34 +29,10 @@ const TwoDTrees = () => {
 
   useEffect(() => {
     const twoDTree = new TwoDTree(points);
-    console.log("WALK");
-    // twoDTree.rootNode?.walk({ strategy: "breadth" }, (node) => {
-    //   console.log(node);
-    //   return true;
-    // });
-    // const nodes = twoDTree.rootNode?.all(() => true);
-    // console.log(nodes);
-    // const visited: Point["id"][] = [];
-    // const dedupedNodes = nodes?.filter((node) => {
-    //   if (visited.includes(node.model.id)) {
-    //     return false;
-    //   }
-    //   visited.push(node.model.id);
-    //   return true;
-    // });
-    // console.log({ dedupedNodes });
-    const visitChildren = (node) => {
-      if (!node || !node.model) {
-        return;
-      }
-      console.log("visited", node.model.id);
-      if (node.children) {
-        node.children.forEach((childNode) => {
-          visitChildren(childNode);
-        });
-      }
-    };
-    visitChildren(twoDTree.rootNode);
+    twoDTree.rootNode?.walk({ strategy: "breadth" }, (node) => {
+      console.log("visited", node);
+      return true;
+    });
   }, [points]);
 
   return (

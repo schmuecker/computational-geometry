@@ -37,13 +37,11 @@ class TwoDTree {
     this.pointsY = klona(points);
     sortPointsInPlace(this.pointsX, "x");
     sortPointsInPlace(this.pointsY, "y");
-    const { pointsX, pointsY } = this;
-    console.log(pointsX, pointsY);
     const medianPoint = getMedian(this.pointsX);
     this.tree = new Tree();
     this.rootNode = this.tree.parse(medianPoint);
     this.build2DTree(0, points.length - 1, this.rootNode, "ver");
-    console.log("Done.", this.rootNode);
+    this.filterTree();
   }
 
   partitionField(
@@ -78,12 +76,10 @@ class TwoDTree {
           console.error("Second duplicate found.", points);
           console.error("Warning: multiple X/Y coordinates");
         }
-        console.log("First duplicate found", points);
         multipleCoords = true;
       }
     }
     // Update median point
-    console.log("Update median point", points[medianIdx]);
     points[medianIdx] = medianPoint;
     // Copy back temporary list
     for (let i = 0; i < tmpPoints1.length; i++) {
@@ -100,13 +96,9 @@ class TwoDTree {
     knot: Knot,
     direction: "hor" | "ver"
   ) {
-    console.log({ leftIdx, rightIdx, knot, direction });
     if (leftIdx <= rightIdx) {
       const medianIdx = Math.floor((leftIdx + rightIdx) / 2);
-      console.log({ medianIdx });
       if (direction === "ver") {
-        console.log("| Vertical |");
-        console.log("Knot is", { ...knot });
         const medianPoint = this.pointsX[medianIdx];
         knot.model = {
           ...knot.model,
@@ -122,8 +114,6 @@ class TwoDTree {
           direction
         );
       } else {
-        console.log("- Horizontal -");
-        console.log("Knot is", { ...knot });
         const medianPoint = this.pointsY[medianIdx];
         knot.model = {
           ...knot.model,
@@ -146,11 +136,23 @@ class TwoDTree {
       knot.addChild(leftNode);
       knot.addChild(rightNode);
       const invertedDirection = direction === "hor" ? "ver" : "hor";
-      console.log({ parentNode: knot, leftIdx, medianIdx });
       this.build2DTree(leftIdx, medianIdx - 1, leftNode, invertedDirection);
-      console.log({ medianIdx, rightIdx });
       this.build2DTree(medianIdx + 1, rightIdx, rightNode, invertedDirection);
     }
+  }
+
+  filterTree() {
+    // Filter out empty nodes
+    const allNodes = this.rootNode?.all(() => true);
+    allNodes?.forEach((node) => {
+      if (
+        node.model.x === 0 &&
+        node.model.y === 0 &&
+        node.children?.length === 0
+      ) {
+        node.drop();
+      }
+    });
   }
 }
 
