@@ -37,10 +37,13 @@ class TwoDTree {
     this.pointsY = klona(points);
     sortPointsInPlace(this.pointsX, "x");
     sortPointsInPlace(this.pointsY, "y");
+    const { pointsX, pointsY } = this;
+    console.log(pointsX, pointsY);
     const medianPoint = getMedian(this.pointsX);
+    this.tree = new Tree();
     this.rootNode = this.tree.parse(medianPoint);
-    this.build2DTree(0, points.length - 1, "ver", this.rootNode, undefined);
-    console.log("Built tree.", this.rootNode);
+    this.build2DTree(0, points.length - 1, this.rootNode, "ver");
+    console.log("Done.", this.rootNode);
   }
 
   partitionField(
@@ -75,10 +78,12 @@ class TwoDTree {
           console.error("Second duplicate found.", points);
           console.error("Warning: multiple X/Y coordinates");
         }
+        console.log("First duplicate found", points);
         multipleCoords = true;
       }
     }
     // Update median point
+    console.log("Update median point", points[medianIdx]);
     points[medianIdx] = medianPoint;
     // Copy back temporary list
     for (let i = 0; i < tmpPoints1.length; i++) {
@@ -92,15 +97,23 @@ class TwoDTree {
   build2DTree(
     leftIdx: number,
     rightIdx: number,
-    direction: "hor" | "ver",
-    knot?: Knot,
-    parentKnot?: Knot
+    knot: Knot,
+    direction: "hor" | "ver"
   ) {
+    console.log({ leftIdx, rightIdx, knot, direction });
     if (leftIdx <= rightIdx) {
       const medianIdx = Math.floor((leftIdx + rightIdx) / 2);
+      console.log({ medianIdx });
       if (direction === "ver") {
+        console.log("| Vertical |");
+        console.log("Knot is", { ...knot });
         const medianPoint = this.pointsX[medianIdx];
-        knot = this.tree.parse(medianPoint);
+        knot.model = {
+          ...knot.model,
+          id: medianPoint.id,
+          x: medianPoint.x,
+          y: medianPoint.y,
+        };
         this.partitionField(
           this.pointsY,
           leftIdx,
@@ -109,8 +122,15 @@ class TwoDTree {
           direction
         );
       } else {
+        console.log("- Horizontal -");
+        console.log("Knot is", { ...knot });
         const medianPoint = this.pointsY[medianIdx];
-        knot = this.tree.parse(medianPoint);
+        knot.model = {
+          ...knot.model,
+          id: medianPoint.id,
+          x: medianPoint.x,
+          y: medianPoint.y,
+        };
         this.partitionField(
           this.pointsX,
           leftIdx,
@@ -119,41 +139,18 @@ class TwoDTree {
           direction
         );
       }
-      if (parentKnot) {
-        console.log("add", knot, "to", parentKnot);
-        parentKnot.addChild(knot);
-      }
+      const leftPoint = new Point(0, 0);
+      const rightPoint = new Point(0, 0);
+      const leftNode = this.tree.parse(leftPoint);
+      const rightNode = this.tree.parse(rightPoint);
+      knot.addChild(leftNode);
+      knot.addChild(rightNode);
       const invertedDirection = direction === "hor" ? "ver" : "hor";
-      this.build2DTree(
-        leftIdx,
-        medianIdx - 1,
-        invertedDirection,
-        undefined,
-        !parentKnot ? this.rootNode : knot
-      );
-      this.build2DTree(
-        medianIdx + 1,
-        rightIdx,
-        invertedDirection,
-        undefined,
-        !parentKnot ? this.rootNode : knot
-      );
+      console.log({ parentNode: knot, leftIdx, medianIdx });
+      this.build2DTree(leftIdx, medianIdx - 1, leftNode, invertedDirection);
+      console.log({ medianIdx, rightIdx });
+      this.build2DTree(medianIdx + 1, rightIdx, rightNode, invertedDirection);
     }
-    // if (points.length === 1) {
-    //   // retun leaf storing the pt in P
-    //   // create new leaf object instead of returning only the point?
-    //   return points[0];
-    // } else {
-    //   if (depth % 2 === 0) {
-    //     // Depth is even
-    //     // split P with vertical line at median
-    //     const median = getMedian(points, "ver");
-    //   } else {
-    //     // Depth is odd
-    //     // split P with horizontal line at median
-    //     const median = getMedian(points, "hor");
-    //   }
-    // }
   }
 }
 
