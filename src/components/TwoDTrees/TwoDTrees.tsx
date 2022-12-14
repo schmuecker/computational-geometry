@@ -9,13 +9,44 @@ const useDrawPartition = (tree, points) => {
 
   useEffect(() => {
     const vectors: Vector[] = [];
-    const drawPartition = (node, boundary = 1000, direction = "ver") => {
+    const drawPartition = (
+      node,
+      boundary = 1000,
+      verBounds = { cur: 0, prev: 0 },
+      horBounds = { cur: 1000, prev: 0 },
+      direction = "ver"
+    ) => {
       const isHor = direction === "hor";
       const isVer = direction === "ver";
-      const startX = isHor && node.model.x < boundary ? 0 : boundary;
-      const startY = isVer && node.model.y < boundary ? 0 : boundary;
-      const endX = startX === 0 ? boundary : 1000;
-      const endY = startY === 0 ? boundary : 1000;
+
+      const xCoord = node.model.x;
+      const yCoord = node.model.y;
+
+      let startX = isHor && xCoord < verBounds.cur ? 0 : verBounds.cur;
+      let startY = isVer && yCoord < horBounds.cur ? 0 : horBounds.cur;
+      let endX = startX === 0 ? verBounds.cur : 1000;
+      let endY = startY === 0 ? horBounds.cur : 1000;
+
+      if (
+        isVer &&
+        ((horBounds.cur > yCoord && yCoord > horBounds.prev) ||
+          (horBounds.prev > yCoord && yCoord > horBounds.cur))
+      ) {
+        startY = horBounds.cur;
+        endY = horBounds.prev;
+        console.log("between hor Bounds");
+      }
+
+      if (
+        isHor &&
+        ((verBounds.cur > xCoord && xCoord > verBounds.prev) ||
+          (verBounds.prev > xCoord && xCoord > verBounds.cur))
+      ) {
+        startX = verBounds.cur;
+        endX = verBounds.prev;
+        console.log("between ver Bounds");
+      }
+
       const start = new Point(
         isHor ? startX : node.model.x,
         isHor ? node.model.y : startY
@@ -29,9 +60,28 @@ const useDrawPartition = (tree, points) => {
       vectors.push(vector);
       if (node.children) {
         node.children.forEach((childNode) => {
-          const newBoundary = isHor ? node.model.y : node.model.x;
           const invertedDirection = isHor ? "ver" : "hor";
-          drawPartition(childNode, newBoundary, invertedDirection);
+          const newBoundary = isHor ? yCoord : xCoord;
+
+          if (isHor) {
+            const newHorBounds = { cur: yCoord, prev: horBounds.cur };
+            drawPartition(
+              childNode,
+              newBoundary,
+              verBounds,
+              newHorBounds,
+              invertedDirection
+            );
+          } else {
+            const newVerBounds = { cur: xCoord, prev: verBounds.cur };
+            drawPartition(
+              childNode,
+              newBoundary,
+              newVerBounds,
+              horBounds,
+              invertedDirection
+            );
+          }
         });
       }
     };
