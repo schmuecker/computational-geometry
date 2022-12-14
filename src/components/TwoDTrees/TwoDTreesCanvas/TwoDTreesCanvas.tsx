@@ -1,18 +1,25 @@
 import Konva from "konva";
-import { Stage, Layer, Circle, Line } from "react-konva";
-
+import { Stage, Layer, Circle, Line, Group } from "react-konva";
 import { Point, Vector } from "../../../lib/geometry";
 
 interface CanvasPointProps {
   point: Point;
   onDelete: (id: Point["id"]) => void;
+  onHoverPoint: (point?: Point) => void;
   fill?: string;
 }
 
-function CanvasPoint({ point, onDelete, fill = "white" }: CanvasPointProps) {
+function CanvasPoint({
+  point,
+  onDelete,
+  onHoverPoint,
+  fill = "white",
+}: CanvasPointProps) {
   const { x, y } = point;
   return (
     <Circle
+      onMouseOver={() => onHoverPoint(point)}
+      onMouseOut={() => onHoverPoint()}
       width={16}
       height={16}
       x={x}
@@ -38,6 +45,7 @@ interface CanvasProps {
   vectors: Vector[];
   onAddPoint: (point: Point) => void;
   onDeletePoint: (id: Point["id"]) => void;
+  onHoverPoint: (point?: Point) => void;
   markedPoint: Point | undefined;
 }
 
@@ -46,6 +54,7 @@ function TwoDTreesCanvas({
   vectors,
   onAddPoint,
   onDeletePoint,
+  onHoverPoint,
   markedPoint,
 }: CanvasProps) {
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -81,7 +90,13 @@ function TwoDTreesCanvas({
         })}
         {points.map((point) => {
           return (
-            <CanvasPoint key={point.id} point={point} onDelete={handleDelete} />
+            <Group key={point.id}>
+              <CanvasPoint
+                point={point}
+                onDelete={handleDelete}
+                onHoverPoint={onHoverPoint}
+              />
+            </Group>
           );
         })}
         {markedPoint && (
@@ -89,6 +104,7 @@ function TwoDTreesCanvas({
             point={markedPoint}
             onDelete={handleDelete}
             fill={"yellow"}
+            onHoverPoint={onHoverPoint}
           />
         )}
       </Layer>

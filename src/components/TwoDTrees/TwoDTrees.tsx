@@ -130,11 +130,13 @@ const TwoDTrees = () => {
         vectors={vectors}
         onAddPoint={handleAddPoint}
         onDeletePoint={handleDeletePoint}
+        onHoverPoint={handleHoverPoint}
         markedPoint={hoverPoint}
       />
       <TreeVisualization
         rootNode={twoDTree.rootNode}
         onHoverPoint={handleHoverPoint}
+        markedPoint={hoverPoint}
       />
     </div>
   );

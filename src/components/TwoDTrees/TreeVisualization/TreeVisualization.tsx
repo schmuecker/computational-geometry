@@ -5,6 +5,7 @@ import { Point } from "../../../lib/geometry";
 type TreeVisualizationProps = {
   rootNode: IKnot | undefined;
   onHoverPoint: (point?: Point) => void;
+  markedPoint?: Point;
 };
 
 const useDrawTree = (rootNode) => {
@@ -31,6 +32,7 @@ const useDrawTree = (rootNode) => {
 const TreeVisualization = ({
   rootNode,
   onHoverPoint,
+  markedPoint,
 }: TreeVisualizationProps) => {
   const leafs = useDrawTree(rootNode);
   return (
@@ -39,7 +41,11 @@ const TreeVisualization = ({
         return (
           <div
             key={leaf.node.model.id}
-            className="group absolute h-4 w-4 rounded-full bg-slate-400"
+            className={`group absolute h-4 w-4 rounded-full ${
+              markedPoint && leaf.node.model.id === markedPoint.id
+                ? "bg-yellow-300"
+                : "bg-slate-400"
+            } `}
             style={{ top: leaf.y, left: leaf.x }}
             onMouseOver={() => {
               onHoverPoint(leaf.node.model);
