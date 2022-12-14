@@ -43,7 +43,7 @@ const TwoDTrees = () => {
     //   layer++;
     //   return true;
     // });
-    const drawPartition = (node, boundary = 0, direction = "hor") => {
+    const drawPartition = (node, boundary = 0, direction = "ver") => {
       const isHor = direction === "hor";
       const startX = isHor && node.model.x < boundary ? 0 : boundary;
       const endX = startX === 0 ? boundary : 1000;
