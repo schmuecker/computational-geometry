@@ -96,6 +96,10 @@ const TwoDTrees = () => {
   const vectors = useDrawPartition(twoDTree, points);
 
   const handleAddPoint = (newPoint: Point) => {
+    if (points.length >= 31) {
+      console.warn("Maximum amount of diplayable points is 32");
+      return;
+    }
     const fitleredPoints = points.filter((point) => {
       if (point.x == newPoint.x && point.y == newPoint.y) {
         return false;
