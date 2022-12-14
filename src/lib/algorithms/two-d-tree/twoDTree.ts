@@ -101,7 +101,6 @@ class TwoDTree {
       if (direction === "ver") {
         const medianPoint = this.pointsX[medianIdx];
         knot.model = {
-          ...knot.model,
           id: medianPoint.id,
           x: medianPoint.x,
           y: medianPoint.y,
@@ -116,7 +115,6 @@ class TwoDTree {
       } else {
         const medianPoint = this.pointsY[medianIdx];
         knot.model = {
-          ...knot.model,
           id: medianPoint.id,
           x: medianPoint.x,
           y: medianPoint.y,
@@ -129,6 +127,7 @@ class TwoDTree {
           direction
         );
       }
+
       const leftPoint = new Point(0, 0);
       const rightPoint = new Point(0, 0);
       const leftNode = this.tree.parse(leftPoint);
