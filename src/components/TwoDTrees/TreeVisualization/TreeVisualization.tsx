@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { IKnot } from "../../../lib/algorithms/two-d-tree/twoDTree";
+import { Point } from "../../../lib/geometry";
 
 type TreeVisualizationProps = {
   rootNode: IKnot | undefined;
+  onHoverPoint: (point?: Point) => void;
 };
 
 const useDrawTree = (rootNode) => {
@@ -26,7 +28,10 @@ const useDrawTree = (rootNode) => {
   return leafs;
 };
 
-const TreeVisualization = ({ rootNode }: TreeVisualizationProps) => {
+const TreeVisualization = ({
+  rootNode,
+  onHoverPoint,
+}: TreeVisualizationProps) => {
   const leafs = useDrawTree(rootNode);
   return (
     <div className="relative h-full">
@@ -36,6 +41,12 @@ const TreeVisualization = ({ rootNode }: TreeVisualizationProps) => {
             key={leaf.node.model.id}
             className="group absolute h-4 w-4 rounded-full bg-slate-400"
             style={{ top: leaf.y, left: leaf.x }}
+            onMouseOver={() => {
+              onHoverPoint(leaf.node.model);
+            }}
+            onMouseOut={() => {
+              onHoverPoint();
+            }}
           >
             <div className="ml-6 hidden bg-white group-hover:block">
               <p>id:{leaf.node.model.id.substr(0, 4)}</p>

@@ -6,9 +6,10 @@ import { Point, Vector } from "../../../lib/geometry";
 interface CanvasPointProps {
   point: Point;
   onDelete: (id: Point["id"]) => void;
+  fill?: string;
 }
 
-function CanvasPoint({ point, onDelete }: CanvasPointProps) {
+function CanvasPoint({ point, onDelete, fill = "white" }: CanvasPointProps) {
   const { x, y } = point;
   return (
     <Circle
@@ -16,7 +17,7 @@ function CanvasPoint({ point, onDelete }: CanvasPointProps) {
       height={16}
       x={x}
       y={y}
-      fill="white"
+      fill={fill}
       onContextMenu={() => onDelete(point.id)}
     />
   );
@@ -37,6 +38,7 @@ interface CanvasProps {
   vectors: Vector[];
   onAddPoint: (point: Point) => void;
   onDeletePoint: (id: Point["id"]) => void;
+  markedPoint: Point | undefined;
 }
 
 function TwoDTreesCanvas({
@@ -44,6 +46,7 @@ function TwoDTreesCanvas({
   vectors,
   onAddPoint,
   onDeletePoint,
+  markedPoint,
 }: CanvasProps) {
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
@@ -81,6 +84,13 @@ function TwoDTreesCanvas({
             <CanvasPoint key={point.id} point={point} onDelete={handleDelete} />
           );
         })}
+        {markedPoint && (
+          <CanvasPoint
+            point={markedPoint}
+            onDelete={handleDelete}
+            fill={"yellow"}
+          />
+        )}
       </Layer>
     </Stage>
   );

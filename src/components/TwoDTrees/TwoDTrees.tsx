@@ -90,6 +90,7 @@ const useDrawPartition = (tree, points) => {
 
 const TwoDTrees = () => {
   const [points, setPoints] = useState<Point[]>([]);
+  const [hoverPoint, setHoverPoint] = useState<Point>();
 
   const twoDTree = new TwoDTree(points);
   const vectors = useDrawPartition(twoDTree, points);
@@ -110,6 +111,10 @@ const TwoDTrees = () => {
     setPoints(newPoints);
   };
 
+  const handleHoverPoint = (point?: Point) => {
+    setHoverPoint(point);
+  };
+
   const handleReset = () => {
     setPoints([]);
   };
@@ -121,8 +126,12 @@ const TwoDTrees = () => {
         vectors={vectors}
         onAddPoint={handleAddPoint}
         onDeletePoint={handleDeletePoint}
+        markedPoint={hoverPoint}
       />
-      <TreeVisualization rootNode={twoDTree.rootNode} />
+      <TreeVisualization
+        rootNode={twoDTree.rootNode}
+        onHoverPoint={handleHoverPoint}
+      />
     </div>
   );
 };
