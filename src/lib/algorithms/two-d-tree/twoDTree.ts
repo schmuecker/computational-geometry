@@ -61,7 +61,7 @@ class TwoDTree {
       direction === "ver" ? this.pointsX[medianIdx] : this.pointsY[medianIdx];
     // Partition the point list
     // (depends on direction)
-    for (let i = leftIdx; i < rightIdx; i++) {
+    for (let i = leftIdx; i <= rightIdx; i++) {
       const point = points[i];
       const pointCoord = point[coordKey];
       const medianCoord = medianPoint[coordKey];
