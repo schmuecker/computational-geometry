@@ -34,7 +34,6 @@ const useDrawPartition = (tree, points) => {
       ) {
         startY = horBounds.cur;
         endY = horBounds.prev;
-        console.log("between hor Bounds");
       }
 
       if (
@@ -44,7 +43,6 @@ const useDrawPartition = (tree, points) => {
       ) {
         startX = verBounds.cur;
         endX = verBounds.prev;
-        console.log("between ver Bounds");
       }
 
       const start = new Point(
