@@ -4,7 +4,7 @@ import Tree from "tree-model";
 import { klona } from "klona";
 import { Point } from "../../geometry";
 
-type Knot = NodeType<Point>;
+type IKnot = NodeType<Point>;
 
 const sortPointsInPlace = (points: Point[], coordinate: "x" | "y") => {
   points.sort((a, b) => {
@@ -27,7 +27,7 @@ class TwoDTree {
   pointsX: Point[] = [];
   pointsY: Point[] = [];
   tree: TreeModel = new Tree();
-  rootNode: Knot | undefined;
+  rootNode: IKnot | undefined;
 
   constructor(points: Point[]) {
     if (points.length === 0) {
@@ -93,7 +93,7 @@ class TwoDTree {
   build2DTree(
     leftIdx: number,
     rightIdx: number,
-    knot: Knot,
+    knot: IKnot,
     direction: "hor" | "ver"
   ) {
     if (leftIdx <= rightIdx) {
@@ -157,3 +157,4 @@ class TwoDTree {
 }
 
 export { TwoDTree };
+export type { IKnot };
