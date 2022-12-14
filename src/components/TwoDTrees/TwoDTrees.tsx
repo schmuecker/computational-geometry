@@ -11,7 +11,6 @@ const useDrawPartition = (tree, points) => {
     const vectors: Vector[] = [];
     const drawPartition = (
       node,
-      boundary = 1000,
       verBounds = { cur: 0, prev: 0 },
       horBounds = { cur: 1000, prev: 0 },
       direction = "ver"
@@ -59,13 +58,11 @@ const useDrawPartition = (tree, points) => {
       if (node.children) {
         node.children.forEach((childNode) => {
           const invertedDirection = isHor ? "ver" : "hor";
-          const newBoundary = isHor ? yCoord : xCoord;
 
           if (isHor) {
             const newHorBounds = { cur: yCoord, prev: horBounds.cur };
             drawPartition(
               childNode,
-              newBoundary,
               verBounds,
               newHorBounds,
               invertedDirection
@@ -74,7 +71,6 @@ const useDrawPartition = (tree, points) => {
             const newVerBounds = { cur: xCoord, prev: verBounds.cur };
             drawPartition(
               childNode,
-              newBoundary,
               newVerBounds,
               horBounds,
               invertedDirection
