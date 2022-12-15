@@ -153,6 +153,65 @@ class TwoDTree {
       }
     });
   }
+
+  rangeSearchCall(queryRange: {
+    x1: number;
+    x2: number;
+    y1: number;
+    y2: number;
+  }) {
+    const output = [];
+
+    function rangeSearch(
+      knot: any,
+      direction: "hor" | "ver",
+      queryRange: { x1: number; x2: number; y1: number; y2: number }
+    ) {
+      if (knot) {
+        let l, r;
+        let coord;
+        if (direction == "ver") {
+          l = queryRange.y1;
+          r = queryRange.y2;
+          coord = knot.model.y;
+          direction = "hor";
+        } else {
+          l = queryRange.x1;
+          r = queryRange.x2;
+          coord = knot.model.x;
+          direction = "ver";
+        }
+        if (
+          queryRange.x1 <= knot.model.x &&
+          knot.model.x <= queryRange.x2 &&
+          queryRange.y1 <= knot.model.y &&
+          knot.model.y <= queryRange.y2
+        ) {
+          output.push(knot);
+        }
+
+        console.log("node", knot);
+        console.log(queryRange);
+        console.log("children", knot.children);
+        console.log("R ", r, "coord", coord);
+
+        // Something is still wrong in this search
+        if (r > coord) {
+          console.log("walked right");
+          rangeSearch(knot.children[1], direction, queryRange);
+        }
+        if (l < coord) {
+          console.log("walked left");
+          rangeSearch(knot.children[0], direction, queryRange);
+        }
+      }
+      return;
+    }
+
+    rangeSearch(this.rootNode, "ver", queryRange);
+    console.log(output);
+    return output;
+  }
 }
 
 export { TwoDTree };

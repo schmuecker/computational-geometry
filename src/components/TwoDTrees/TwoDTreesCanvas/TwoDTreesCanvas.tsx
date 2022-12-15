@@ -44,6 +44,8 @@ function CanvasVector({ vector }: CanvasVectorProps) {
 interface CanvasProps {
   points: Point[];
   vectors: Vector[];
+  searchRect: any;
+  onSearchRectChange: any;
   onAddPoint: (point: Point) => void;
   onDeletePoint: (id: Point["id"]) => void;
   onHoverPoint: (point?: Point) => void;
@@ -53,13 +55,13 @@ interface CanvasProps {
 function TwoDTreesCanvas({
   points,
   vectors,
+  searchRect,
+  onSearchRectChange,
   onAddPoint,
   onDeletePoint,
   onHoverPoint,
   markedPoint,
 }: CanvasProps) {
-  const [newAnnotation, setNewAnnotation] = useState([]);
-
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
     if (isRightClick) return;
@@ -76,30 +78,27 @@ function TwoDTreesCanvas({
   };
 
   const handleMouseDown = (event) => {
-    if (newAnnotation.length === 0) {
+    if (!searchRect) {
       const { x, y } = event.target.getStage().getPointerPosition();
-      setNewAnnotation([{ x, y, width: 0, height: 0, key: "0" }]);
+      onSearchRectChange({ x, y, width: 0, height: 0, key: "0" });
     }
   };
 
   const handleMouseUp = (event) => {
-    setNewAnnotation([]);
+    onSearchRectChange(undefined);
   };
 
   const handleMouseMove = (event) => {
-    if (newAnnotation.length === 1) {
-      const sx = newAnnotation[0].x;
-      const sy = newAnnotation[0].y;
+    if (searchRect) {
+      const sx = searchRect.x;
+      const sy = searchRect.y;
       const { x, y } = event.target.getStage().getPointerPosition();
-      setNewAnnotation([
-        {
-          x: sx,
-          y: sy,
-          width: x - sx,
-          height: y - sy,
-          key: "0",
-        },
-      ]);
+      onSearchRectChange({
+        x: sx,
+        y: sy,
+        width: x - sx,
+        height: y - sy,
+      });
     }
   };
 
@@ -133,12 +132,12 @@ function TwoDTreesCanvas({
             </Group>
           );
         })}
-        {newAnnotation[0] && (
+        {searchRect && (
           <Rect
-            x={newAnnotation[0].x}
-            y={newAnnotation[0].y}
-            width={newAnnotation[0].width}
-            height={newAnnotation[0].height}
+            x={searchRect.x}
+            y={searchRect.y}
+            width={searchRect.width}
+            height={searchRect.height}
             fill="transparent"
             stroke="red"
           />

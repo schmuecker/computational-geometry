@@ -1,16 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
-import { TwoDTree } from "../../lib/algorithms/two-d-tree/twoDTree";
+import { IKnot, TwoDTree } from "../../lib/algorithms/two-d-tree/twoDTree";
 import { Point, Vector } from "../../lib/geometry";
 import TreeVisualization from "./TreeVisualization/TreeVisualization";
 import TwoDTreesCanvas from "./TwoDTreesCanvas/TwoDTreesCanvas";
 
-const useDrawPartition = (tree, points) => {
+interface SearchRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const useDrawPartition = (tree: TwoDTree, points: Point[]) => {
   const [vectors, setVectors] = useState<Vector[]>([]);
 
   useEffect(() => {
     const vectors: Vector[] = [];
     const drawPartition = (
-      node,
+      node: IKnot,
       verBounds = { cur: 0, prev: 0 },
       horBounds = { cur: 1000, prev: 0 },
       direction = "ver"
@@ -56,7 +63,7 @@ const useDrawPartition = (tree, points) => {
       // console.log(vector.a, vector.b);
       vectors.push(vector);
       if (node.children) {
-        node.children.forEach((childNode) => {
+        node.children.forEach((childNode: IKnot) => {
           const invertedDirection = isHor ? "ver" : "hor";
 
           if (isHor) {
@@ -79,7 +86,7 @@ const useDrawPartition = (tree, points) => {
         });
       }
     };
-    if (points.length > 0) {
+    if (points.length > 0 && tree.rootNode) {
       drawPartition(tree.rootNode);
     }
     setVectors(vectors);
@@ -88,12 +95,45 @@ const useDrawPartition = (tree, points) => {
   return vectors;
 };
 
+const useRangeSearch = (tree: TwoDTree, searchRect: SearchRect | undefined) => {
+  const [output, setOutput] = useState<IKnot[]>([]);
+  useEffect(() => {
+    if (!searchRect) {
+      return;
+    }
+    const { x, y, width, height } = searchRect;
+
+    const searchQuery = { x1: 0, x2: 0, y1: 0, y2: 0 };
+    if (width > 0) {
+      searchQuery.x1 = x;
+      searchQuery.x2 = x + width;
+    } else {
+      searchQuery.x1 = x + width;
+      searchQuery.x2 = x;
+    }
+
+    if (height > 0) {
+      searchQuery.y1 = y;
+      searchQuery.y2 = y + height;
+    } else {
+      searchQuery.y1 = y + height;
+      searchQuery.y2 = y;
+    }
+
+    const result = tree.rangeSearchCall(searchQuery);
+    setOutput(result);
+  }, [searchRect]);
+  return output;
+};
+
 const TwoDTrees = () => {
   const [points, setPoints] = useState<Point[]>([]);
   const [hoverPoint, setHoverPoint] = useState<Point>();
+  const [searchRect, setSearchRect] = useState<SearchRect>();
 
   const twoDTree = new TwoDTree(points);
   const vectors = useDrawPartition(twoDTree, points);
+  const searchResult = useRangeSearch(twoDTree, searchRect);
 
   const handleAddPoint = (newPoint: Point) => {
     if (points.length >= 31) {
@@ -128,6 +168,8 @@ const TwoDTrees = () => {
       <TwoDTreesCanvas
         points={points}
         vectors={vectors}
+        searchRect={searchRect}
+        onSearchRectChange={setSearchRect}
         onAddPoint={handleAddPoint}
         onDeletePoint={handleDeletePoint}
         onHoverPoint={handleHoverPoint}
