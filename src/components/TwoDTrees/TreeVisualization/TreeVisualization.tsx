@@ -49,7 +49,7 @@ const getLeafColor = (leaf, markedPoint, searchResult) => {
       return knot.model.id === leafId;
     });
     if (visited[0]) {
-      color = "bg-red-400";
+      return (color = "bg-red-400");
     }
   }
 
@@ -58,7 +58,7 @@ const getLeafColor = (leaf, markedPoint, searchResult) => {
       return knot.model.id === leafId;
     });
     if (output[0]) {
-      color = "bg-green-400";
+      return (color = "bg-green-400");
     }
   }
 

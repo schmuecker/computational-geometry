@@ -168,19 +168,20 @@ class TwoDTree {
       direction: "hor" | "ver",
       queryRange: { x1: number; x2: number; y1: number; y2: number }
     ) {
-      if (knot) {
+      if (knot != undefined) {
         let l, r;
         let coord;
-        if (direction == "ver") {
+        let dNew: "hor" | "ver";
+        if (direction === "ver") {
           l = queryRange.y1;
           r = queryRange.y2;
           coord = knot.model.y;
-          direction = "hor";
+          dNew = "hor";
         } else {
           l = queryRange.x1;
           r = queryRange.x2;
           coord = knot.model.x;
-          direction = "ver";
+          dNew = "ver";
         }
         if (
           queryRange.x1 <= knot.model.x &&
@@ -193,12 +194,14 @@ class TwoDTree {
           visited.push(knot);
         }
 
-        // Something is still wrong in this search
+        // Our Tree Structure does not support left and right children
+        // therefore range search can not run on maximum efficiency
+
         if (l < coord) {
-          rangeSearch(knot.children[0], direction, queryRange);
+          rangeSearch(knot.children[0], dNew, queryRange);
         }
         if (r > coord) {
-          rangeSearch(knot.children[1], direction, queryRange);
+          rangeSearch(knot.children[1], dNew, queryRange);
         }
       }
       return;
