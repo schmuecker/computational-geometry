@@ -1,5 +1,6 @@
 import Konva from "konva";
-import { Stage, Layer, Circle, Line, Group } from "react-konva";
+import { useState } from "react";
+import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
 import { Point, Vector } from "../../../lib/geometry";
 
 interface CanvasPointProps {
@@ -57,6 +58,8 @@ function TwoDTreesCanvas({
   onHoverPoint,
   markedPoint,
 }: CanvasProps) {
+  const [newAnnotation, setNewAnnotation] = useState([]);
+
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
     if (isRightClick) return;
@@ -72,6 +75,34 @@ function TwoDTreesCanvas({
     onAddPoint(new Point(x, y));
   };
 
+  const handleMouseDown = (event) => {
+    if (newAnnotation.length === 0) {
+      const { x, y } = event.target.getStage().getPointerPosition();
+      setNewAnnotation([{ x, y, width: 0, height: 0, key: "0" }]);
+    }
+  };
+
+  const handleMouseUp = (event) => {
+    setNewAnnotation([]);
+  };
+
+  const handleMouseMove = (event) => {
+    if (newAnnotation.length === 1) {
+      const sx = newAnnotation[0].x;
+      const sy = newAnnotation[0].y;
+      const { x, y } = event.target.getStage().getPointerPosition();
+      setNewAnnotation([
+        {
+          x: sx,
+          y: sy,
+          width: x - sx,
+          height: y - sy,
+          key: "0",
+        },
+      ]);
+    }
+  };
+
   const handleDelete = (id: Point["id"]) => {
     onDeletePoint(id);
   };
@@ -82,6 +113,9 @@ function TwoDTreesCanvas({
       width={window.innerWidth}
       height={window.innerHeight * 0.6}
       onClick={handleCanvasClick}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseMove={handleMouseMove}
       onContextMenu={(e) => e.evt.preventDefault()}
     >
       <Layer>
@@ -99,6 +133,16 @@ function TwoDTreesCanvas({
             </Group>
           );
         })}
+        {newAnnotation[0] && (
+          <Rect
+            x={newAnnotation[0].x}
+            y={newAnnotation[0].y}
+            width={newAnnotation[0].width}
+            height={newAnnotation[0].height}
+            fill="transparent"
+            stroke="red"
+          />
+        )}
         {markedPoint && (
           <CanvasPoint
             point={markedPoint}
