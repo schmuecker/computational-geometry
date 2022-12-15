@@ -6,19 +6,20 @@ type TreeVisualizationProps = {
   rootNode: IKnot | undefined;
   onHoverPoint: (point?: Point) => void;
   markedPoint?: Point;
+  searchResult?: { output: IKnot[]; visited: IKnot[] };
 };
 
-const useDrawTree = (rootNode) => {
+const useDrawTree = (rootNode: IKnot) => {
   // const [vectors, setVectors] = useState<Vector[]>([]);
   let leafs = [];
   if (!rootNode) {
     return;
   }
-  const drawTree = (node, layer = 0, x = 200) => {
+  const drawTree = (node: IKnot, layer = 0, x = 200) => {
     const y = layer * 50;
     leafs = [...leafs, { x, y, node }];
     if (node.children) {
-      node.children.forEach((childNode, index) => {
+      node.children.forEach((childNode: IKnot, index: number) => {
         const offset = 100 / Math.pow(2, layer);
         const xChild = index === 0 ? x - offset : x + offset;
         drawTree(childNode, layer + 1, xChild);
@@ -29,11 +30,50 @@ const useDrawTree = (rootNode) => {
   return leafs;
 };
 
+const getLeafColor = (leaf, markedPoint, searchResult) => {
+  let color = "bg-slate-400";
+  const leafId = leaf.node.model.id;
+  let visited: IKnot[] = [];
+  let output: IKnot[] = [];
+
+  if (markedPoint && leafId === markedPoint.id) {
+    color = "bg-yellow-300";
+  }
+
+  if (!searchResult) {
+    return color;
+  }
+
+  if (searchResult.visited[0]) {
+    visited = searchResult.visited.filter((knot: IKnot) => {
+      return knot.model.id === leafId;
+    });
+    if (visited[0]) {
+      color = "bg-red-400";
+    }
+  }
+
+  if (searchResult.output[0]) {
+    output = searchResult.output.filter((knot: IKnot) => {
+      return knot.model.id === leafId;
+    });
+    if (output[0]) {
+      color = "bg-green-400";
+    }
+  }
+
+  return color;
+};
+
 const TreeVisualization = ({
   rootNode,
   onHoverPoint,
   markedPoint,
+  searchResult,
 }: TreeVisualizationProps) => {
+  if (!rootNode) {
+    return;
+  }
   const leafs = useDrawTree(rootNode);
   return (
     <div className="relative h-full">
@@ -41,11 +81,11 @@ const TreeVisualization = ({
         return (
           <div
             key={leaf.node.model.id}
-            className={`group absolute h-4 w-4 rounded-full ${
-              markedPoint && leaf.node.model.id === markedPoint.id
-                ? "bg-yellow-300"
-                : "bg-slate-400"
-            } `}
+            className={`group absolute h-4 w-4 rounded-full ${getLeafColor(
+              leaf,
+              markedPoint,
+              searchResult
+            )} `}
             style={{ top: leaf.y, left: leaf.x }}
             onMouseOver={() => {
               onHoverPoint(leaf.node.model);

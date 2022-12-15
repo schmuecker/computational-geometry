@@ -160,7 +160,8 @@ class TwoDTree {
     y1: number;
     y2: number;
   }) {
-    const output = [];
+    const output: IKnot[] = [];
+    const visited: IKnot[] = [];
 
     function rangeSearch(
       knot: any,
@@ -188,29 +189,23 @@ class TwoDTree {
           knot.model.y <= queryRange.y2
         ) {
           output.push(knot);
+        } else {
+          visited.push(knot);
         }
-
-        console.log("node", knot);
-        console.log(queryRange);
-        console.log("children", knot.children);
-        console.log("R ", r, "coord", coord);
 
         // Something is still wrong in this search
-        if (r > coord) {
-          console.log("walked right");
-          rangeSearch(knot.children[1], direction, queryRange);
-        }
         if (l < coord) {
-          console.log("walked left");
           rangeSearch(knot.children[0], direction, queryRange);
+        }
+        if (r > coord) {
+          rangeSearch(knot.children[1], direction, queryRange);
         }
       }
       return;
     }
 
     rangeSearch(this.rootNode, "ver", queryRange);
-    console.log(output);
-    return output;
+    return { output, visited };
   }
 }
 

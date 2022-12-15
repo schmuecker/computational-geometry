@@ -96,9 +96,17 @@ const useDrawPartition = (tree: TwoDTree, points: Point[]) => {
 };
 
 const useRangeSearch = (tree: TwoDTree, searchRect: SearchRect | undefined) => {
-  const [output, setOutput] = useState<IKnot[]>([]);
+  const [result, setResult] = useState<{ output: IKnot[]; visited: IKnot[] }>({
+    output: [],
+    visited: [],
+  });
   useEffect(() => {
-    if (!searchRect) {
+    if (
+      !searchRect ||
+      Math.abs(searchRect.width) < 2 ||
+      Math.abs(searchRect.height) < 2
+    ) {
+      setResult({ output: [], visited: [] });
       return;
     }
     const { x, y, width, height } = searchRect;
@@ -121,9 +129,9 @@ const useRangeSearch = (tree: TwoDTree, searchRect: SearchRect | undefined) => {
     }
 
     const result = tree.rangeSearchCall(searchQuery);
-    setOutput(result);
+    setResult(result);
   }, [searchRect]);
-  return output;
+  return result;
 };
 
 const TwoDTrees = () => {
@@ -174,11 +182,13 @@ const TwoDTrees = () => {
         onDeletePoint={handleDeletePoint}
         onHoverPoint={handleHoverPoint}
         markedPoint={hoverPoint}
+        searchResult={searchResult}
       />
       <TreeVisualization
         rootNode={twoDTree.rootNode}
         onHoverPoint={handleHoverPoint}
         markedPoint={hoverPoint}
+        searchResult={searchResult}
       />
     </div>
   );

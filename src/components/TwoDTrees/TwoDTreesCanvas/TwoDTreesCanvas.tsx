@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { useState } from "react";
 import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
+import { IKnot } from "../../../lib/algorithms/two-d-tree/twoDTree";
 import { Point, Vector } from "../../../lib/geometry";
 
 interface CanvasPointProps {
@@ -50,6 +51,7 @@ interface CanvasProps {
   onDeletePoint: (id: Point["id"]) => void;
   onHoverPoint: (point?: Point) => void;
   markedPoint: Point | undefined;
+  searchResult: { output: IKnot[]; visited: IKnot[] };
 }
 
 function TwoDTreesCanvas({
@@ -61,6 +63,7 @@ function TwoDTreesCanvas({
   onDeletePoint,
   onHoverPoint,
   markedPoint,
+  searchResult,
 }: CanvasProps) {
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
@@ -123,13 +126,36 @@ function TwoDTreesCanvas({
         })}
         {points.map((point) => {
           return (
-            <Group key={point.id}>
-              <CanvasPoint
-                point={point}
-                onDelete={handleDelete}
-                onHoverPoint={onHoverPoint}
-              />
-            </Group>
+            <CanvasPoint
+              key={point.id}
+              point={point}
+              onDelete={handleDelete}
+              onHoverPoint={onHoverPoint}
+            />
+          );
+        })}
+        {searchResult.visited.map((knot) => {
+          const point = knot.model;
+          return (
+            <CanvasPoint
+              key={point.id}
+              point={point}
+              onDelete={handleDelete}
+              onHoverPoint={onHoverPoint}
+              fill={"red"}
+            />
+          );
+        })}
+        {searchResult.output.map((knot) => {
+          const point = knot.model;
+          return (
+            <CanvasPoint
+              key={point.id}
+              point={point}
+              onDelete={handleDelete}
+              onHoverPoint={onHoverPoint}
+              fill={"green"}
+            />
           );
         })}
         {searchRect && (
