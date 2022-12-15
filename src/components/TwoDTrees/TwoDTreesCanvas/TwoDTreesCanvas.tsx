@@ -154,7 +154,7 @@ function TwoDTreesCanvas({
               point={point}
               onDelete={handleDelete}
               onHoverPoint={onHoverPoint}
-              fill={"green"}
+              fill={"yellow"}
             />
           );
         })}
@@ -165,7 +165,7 @@ function TwoDTreesCanvas({
             width={searchRect.width}
             height={searchRect.height}
             fill="transparent"
-            stroke="red"
+            stroke="yellow"
           />
         )}
         {markedPoint && (
