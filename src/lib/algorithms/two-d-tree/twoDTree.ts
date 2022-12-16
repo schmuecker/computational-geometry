@@ -5,7 +5,9 @@ import Tree from "tree-model";
 import { klona } from "klona";
 import { Point } from "../../geometry";
 
-type IKnot = TreeModel.Node<Point>;
+type IKnot = TreeModel.Node<Point> & {
+  location?: "left" | "right";
+};
 
 const sortPointsInPlace = (points: Point[], coordinate: "x" | "y") => {
   points.sort((a, b) => {
@@ -133,6 +135,8 @@ class TwoDTree {
       const rightPoint = new Point(0, 0);
       const leftNode = this.tree.parse(leftPoint);
       const rightNode = this.tree.parse(rightPoint);
+      leftNode.location = "left";
+      rightNode.location = "right";
       knot.addChild(leftNode);
       knot.addChild(rightNode);
       const invertedDirection = direction === "hor" ? "ver" : "hor";
@@ -195,14 +199,17 @@ class TwoDTree {
           visited.push(knot);
         }
 
-        // Our Tree Structure does not support left and right children
-        // therefore range search can not run on maximum efficiency
-
         if (l < coord) {
-          rangeSearch(knot.children[0], dNew, queryRange);
+          const leftChild = knot.children?.find((childNode: IKnot) => {
+            return childNode.location === "left";
+          });
+          rangeSearch(leftChild, dNew, queryRange);
         }
         if (r > coord) {
-          rangeSearch(knot.children[1], dNew, queryRange);
+          const rightChild = knot.children?.find((childNode: IKnot) => {
+            return childNode.location === "right";
+          });
+          rangeSearch(rightChild, dNew, queryRange);
         }
       }
       return;
