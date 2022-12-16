@@ -1,10 +1,11 @@
 // Pseudo Code from : https://www.youtube.com/watch?v=G84XQfP4FTU :)
-import TreeModel, { Node as NodeType } from "tree-model/types";
+// eslint-disable-next-line import/no-unresolved
+import TreeModel from "tree-model/types";
 import Tree from "tree-model";
 import { klona } from "klona";
 import { Point } from "../../geometry";
 
-type IKnot = NodeType<Point>;
+type IKnot = TreeModel.Node<Point>;
 
 const sortPointsInPlace = (points: Point[], coordinate: "x" | "y") => {
   points.sort((a, b) => {
@@ -164,7 +165,7 @@ class TwoDTree {
     const visited: IKnot[] = [];
 
     function rangeSearch(
-      knot: any,
+      knot: IKnot,
       direction: "hor" | "ver",
       queryRange: { x1: number; x2: number; y1: number; y2: number }
     ) {
@@ -207,6 +208,9 @@ class TwoDTree {
       return;
     }
 
+    if (!this.rootNode) {
+      return;
+    }
     rangeSearch(this.rootNode, "ver", queryRange);
     return { output, visited };
   }
