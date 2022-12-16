@@ -1,6 +1,5 @@
 import Konva from "konva";
-import { useState } from "react";
-import { Stage, Layer, Circle, Line, Group, Rect } from "react-konva";
+import { Stage, Layer, Circle, Line, Rect } from "react-konva";
 import { IKnot } from "../../../lib/algorithms/two-d-tree/twoDTree";
 import { Point, Vector } from "../../../lib/geometry";
 
@@ -80,22 +79,26 @@ function TwoDTreesCanvas({
     onAddPoint(new Point(x, y));
   };
 
-  const handleMouseDown = (event) => {
+  const handleMouseDown = (event: Konva.KonvaEventObject<MouseEvent>) => {
     if (!searchRect) {
-      const { x, y } = event.target.getStage().getPointerPosition();
+      const stage = event.target.getStage();
+      if (!stage) return;
+      const { x, y } = stage.getPointerPosition() || { x: 0, y: 0 };
       onSearchRectChange({ x, y, width: 0, height: 0, key: "0" });
     }
   };
 
-  const handleMouseUp = (event) => {
+  const handleMouseUp = () => {
     onSearchRectChange(undefined);
   };
 
-  const handleMouseMove = (event) => {
+  const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
     if (searchRect) {
+      const stage = event.target.getStage();
+      if (!stage) return;
+      const { x, y } = stage.getPointerPosition() || { x: 0, y: 0 };
       const sx = searchRect.x;
       const sy = searchRect.y;
-      const { x, y } = event.target.getStage().getPointerPosition();
       onSearchRectChange({
         x: sx,
         y: sy,

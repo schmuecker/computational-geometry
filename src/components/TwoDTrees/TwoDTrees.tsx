@@ -129,7 +129,9 @@ const useRangeSearch = (tree: TwoDTree, searchRect: SearchRect | undefined) => {
     }
 
     const result = tree.rangeSearchCall(searchQuery);
-    setResult(result);
+    if (result) {
+      setResult(result);
+    }
   }, [searchRect]);
   return result;
 };

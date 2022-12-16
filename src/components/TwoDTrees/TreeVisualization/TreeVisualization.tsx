@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { IKnot } from "../../../lib/algorithms/two-d-tree/twoDTree";
 import { Point } from "../../../lib/geometry";
 
@@ -72,7 +71,7 @@ const TreeVisualization = ({
   searchResult,
 }: TreeVisualizationProps) => {
   if (!rootNode) {
-    return;
+    return null;
   }
   const leafs = useDrawTree(rootNode);
   return (
