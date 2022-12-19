@@ -18,9 +18,9 @@ const useDrawTree = (rootNode: IKnot) => {
     const y = layer * 50;
     leafs = [...leafs, { x, y, node }];
     if (node.children) {
-      node.children.forEach((childNode: IKnot, index: number) => {
+      node.children.forEach((childNode: IKnot) => {
         const offset = 100 / Math.pow(2, layer);
-        const xChild = index === 0 ? x - offset : x + offset;
+        const xChild = childNode.location === "left" ? x - offset : x + offset;
         drawTree(childNode, layer + 1, xChild);
       });
     }
