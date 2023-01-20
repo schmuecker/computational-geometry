@@ -35,7 +35,11 @@ const useDrawTree = (rootNode: IKnot) => {
   return leafs;
 };
 
-const getLeafColor = (leaf: Leaf, markedPoint, searchResult) => {
+const getLeafColor = (
+  leaf: Leaf,
+  markedPoint?: Point,
+  searchResult?: { output: IKnot[]; visited: IKnot[] }
+) => {
   let color = "bg-slate-400";
   const leafId = leaf.node.model.id;
   let visited: IKnot[] = [];

@@ -1,9 +1,7 @@
-import { Path } from "../../../types/Path";
-
 interface AProps {
   children: React.ReactNode;
   href?: string;
-  to?: Path;
+  to?: string;
   className?: string;
   "aria-current"?: "page";
 }
