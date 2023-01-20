@@ -1,4 +1,9 @@
-import { CubeIcon, PauseIcon, VariableIcon } from "@heroicons/react/24/outline";
+import {
+  CubeIcon,
+  PauseIcon,
+  VariableIcon,
+  QrCodeIcon,
+} from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
 
@@ -28,6 +33,12 @@ function App() {
       icon: VariableIcon,
       current: pathname === "/newtons-method",
       hardRefresh: true,
+    },
+    {
+      name: "2D-Trees ",
+      href: "/2d-trees",
+      icon: QrCodeIcon,
+      current: pathname === "/2d-trees",
     },
   ];
 

@@ -16,6 +16,7 @@ specifiers:
   eslint-config-prettier: ^8.5.0
   eslint-plugin-import: ^2.26.0
   eslint-plugin-react: ^7.31.11
+  klona: ^2.0.5
   konva: ^8.3.13
   localforage: ^1.10.0
   mafs: ^0.6.1
@@ -30,6 +31,7 @@ specifiers:
   react-router-dom: ^6.4.3
   sort-by: ^1.2.0
   tailwindcss: ^3.2.2
+  tree-model: ^1.0.7
   typescript: ^4.6.4
   vite: ^3.2.0
 
@@ -39,6 +41,7 @@ dependencies:
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.2
   avl: 1.5.3
   clsx: 1.2.1
+  klona: 2.0.5
   konva: 8.3.13
   localforage: 1.10.0
   mafs: 0.6.1_biqbaboplfbrettd7655fr4n2y
@@ -49,6 +52,7 @@ dependencies:
   react-konva: 18.2.3_ycsaxglfwmvsphhhrpeabwxklq
   react-router-dom: 6.4.3_biqbaboplfbrettd7655fr4n2y
   sort-by: 1.2.0
+  tree-model: 1.0.7
 
 devDependencies:
   '@types/react': 18.0.25
@@ -1594,6 +1598,10 @@ packages:
     dependencies:
       to-regex-range: 5.0.1
 
+  /find-insert-index/0.0.1:
+    resolution: {integrity: sha512-eIqFuQzY7XwpAJ3sHWKFNGLx1nm3w/IhmFASETcx5sUuCaOUd3xDqRK/376SzXMVVJQaJUCPlS7L841T0xpFjQ==}
+    dev: false
+
   /find-up/5.0.0:
     resolution: {integrity: sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng==}
     engines: {node: '>=10'}
@@ -1962,6 +1970,11 @@ packages:
       object.assign: 4.1.4
     dev: true
 
+  /klona/2.0.5:
+    resolution: {integrity: sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==}
+    engines: {node: '>= 8'}
+    dev: false
+
   /konva/8.3.13:
     resolution: {integrity: sha512-O5VxHfRfTj4PscTglQH1NimS8+CC5hQYLeB8YQstu8MN/i2L8GjA1T9d7xxzITF2TD5+xcIs5ei7en3cztbNXg==}
     dev: false
@@ -2046,6 +2059,10 @@ packages:
   /merge2/1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
+
+  /mergesort/0.0.1:
+    resolution: {integrity: sha512-WKghTBzqAvTt9rG5TWS78Dmk2kCCL9VkkX8Zi9kKfJ4iqYpvcGGpeYtkhPHa9NZAPLivZiZsdO/LBG3ENayDmQ==}
+    dev: false
 
   /micromatch/4.0.5:
     resolution: {integrity: sha512-DMy+ERcEW2q8Z2Po+WNXuw3c5YaUSFjAO5GsJqfEl7UjvtIuFKO6ZrKvcItdy98dwFI2N1tg3zNIdKaQT+aNdA==}
@@ -2686,6 +2703,13 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       is-number: 7.0.0
+
+  /tree-model/1.0.7:
+    resolution: {integrity: sha512-oP4LUbCVtD2gcjcRaeI4L5hY60tHzB+AK/bthIJ2Pq1EUUOio5/xFzPWnGoBZlhtqpqbOkhFDzKIwKLOn0kccQ==}
+    dependencies:
+      find-insert-index: 0.0.1
+      mergesort: 0.0.1
+    dev: false
 
   /tsconfig-paths/3.14.1:
     resolution: {integrity: sha512-fxDhWnFSLt3VuTwtvJt5fpwxBHg5AdKWMsgcPOOIilyjymcYVZoCQF8fvFRezCNfblEXmi+PcM1eYHeOAgXCOQ==}

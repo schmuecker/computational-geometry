@@ -38,7 +38,7 @@ const functionOptions: Option[] = [
   { id: "4", label: "x^3 - 6x^2 + 4x + 12" },
 ];
 
-export const Newton = () => {
+const Newton = () => {
   const [fnId, setFnId] = useState<Option["id"]>(() => functionOptions[0].id);
   const [accuracy, setAccuracy] = useState<number>(0.01);
   const [maxIter, setMaxIter] = useState<number>(10);
@@ -110,3 +110,5 @@ export const Newton = () => {
     </div>
   );
 };
+
+export default Newton;
