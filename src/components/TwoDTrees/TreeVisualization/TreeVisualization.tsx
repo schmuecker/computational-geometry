@@ -8,9 +8,15 @@ type TreeVisualizationProps = {
   searchResult?: { output: IKnot[]; visited: IKnot[] };
 };
 
+type Leaf = {
+  x: number;
+  y: number;
+  node: IKnot;
+};
+
 const useDrawTree = (rootNode: IKnot) => {
   // const [vectors, setVectors] = useState<Vector[]>([]);
-  let leafs = [];
+  let leafs: Leaf[] = [];
   if (!rootNode) {
     return;
   }
@@ -29,7 +35,7 @@ const useDrawTree = (rootNode: IKnot) => {
   return leafs;
 };
 
-const getLeafColor = (leaf, markedPoint, searchResult) => {
+const getLeafColor = (leaf: Leaf, markedPoint, searchResult) => {
   let color = "bg-slate-400";
   const leafId = leaf.node.model.id;
   let visited: IKnot[] = [];
