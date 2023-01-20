@@ -3,6 +3,8 @@ import {
   PauseIcon,
   VariableIcon,
   QrCodeIcon,
+  ChartPieIcon,
+  MapIcon,
 } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
@@ -39,6 +41,12 @@ function App() {
       href: "/2d-trees",
       icon: QrCodeIcon,
       current: pathname === "/2d-trees",
+    },
+    {
+      name: "Triangulation",
+      href: "/triangulation",
+      icon: MapIcon,
+      current: pathname === "/triangulation",
     },
   ];
 

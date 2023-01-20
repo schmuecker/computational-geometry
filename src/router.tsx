@@ -4,6 +4,7 @@ import App from "./App";
 import ConvexHull from "./components/ConvexHull/ConvexHull";
 import Newton from "./components/Newton/Newton";
 import SweepingLines from "./components/SweepLine/SweepLine";
+import Triangulation from "./components/Triangulation/Triangulation";
 import TwoDTrees from "./components/TwoDTrees/TwoDTrees";
 
 const router = createBrowserRouter([
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "/2d-trees",
         element: <TwoDTrees />,
+      },
+      {
+        path: "/triangulation",
+        element: <Triangulation />,
       },
     ],
   },
