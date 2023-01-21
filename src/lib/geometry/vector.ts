@@ -21,6 +21,14 @@ class Vector {
   cross(vectorB: Vector) {
     return this.v_x * vectorB.v_y - vectorB.v_x * this.v_y;
   }
+
+  dot(vectorB: Vector) {
+    return this.v_x * vectorB.v_x + this.v_y * vectorB.v_y;
+  }
+
+  angle(vectorB: Vector) {
+    return Math.atan2(this.cross(vectorB), this.dot(vectorB));
+  }
 }
 
 export { Vector };

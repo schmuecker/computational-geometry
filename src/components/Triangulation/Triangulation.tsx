@@ -1,36 +1,40 @@
 import { useState } from "react";
-import { isoSweep } from "../../lib/algorithms";
-import { Vector } from "../../lib/geometry";
+import { triangulatePolygon } from "../../lib/algorithms/triangulation/triangulation";
+
+import { Point } from "../../lib/geometry";
 import { ResetButton } from "../Button/ResetButton";
 import TriangulationCanvas from "./TriangulationCanvas/TriangulationCanvas";
 
 function Triangulation() {
-  const [segments, setSegments] = useState<Vector[]>([]);
-  const canvasHeight = window.innerHeight * 0.6;
-  const { events, intersections } = isoSweep(segments);
+  const [points, setPoints] = useState<Point[]>([]);
+  console.log(triangulatePolygon(points));
 
-  const handleAddSegment = (newSegment: Vector) => {
-    setSegments((state) => [...state, newSegment]);
+  const handleAddPoint = (newPoint: Point) => {
+    const fitleredPoints = points.filter((point) => {
+      if (point.x == newPoint.x && point.y == newPoint.y) {
+        return false;
+      }
+      return true;
+    });
+    const newPoints = [...fitleredPoints, newPoint];
+    setPoints(newPoints);
   };
 
   const handleReset = () => {
-    setSegments([]);
+    setPoints([]);
   };
 
   return (
     <div>
       <div className="mb-8 flex w-full items-end justify-between">
-        <p className="text-base font-medium text-gray-900">
-          Delaunay Triangulation
-        </p>
-        <ResetButton onClick={handleReset} />
+        <div>
+          <ResetButton onClick={handleReset} />
+        </div>
       </div>
       <TriangulationCanvas
-        events={events}
-        intersections={intersections}
-        height={canvasHeight}
-        segments={segments}
-        onAddSegment={handleAddSegment}
+        points={points}
+        vectors={[]}
+        onAddPoint={handleAddPoint}
       />
     </div>
   );

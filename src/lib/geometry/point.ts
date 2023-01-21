@@ -10,6 +10,10 @@ class Point {
     this.x = x;
     this.y = y;
   }
+
+  toString() {
+    return `Point { x: ${this.x}, y: ${this.y} }`;
+  }
 }
 
 export { Point };

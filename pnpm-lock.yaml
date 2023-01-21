@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@datastructures-js/linked-list': ^5.2.5
   '@datastructures-js/priority-queue': ^6.2.0
   '@headlessui/react': ^1.7.4
   '@heroicons/react': ^2.0.13
@@ -37,6 +38,7 @@ specifiers:
   vite: ^3.2.0
 
 dependencies:
+  '@datastructures-js/linked-list': 5.2.5
   '@datastructures-js/priority-queue': 6.2.0
   '@headlessui/react': 1.7.4_biqbaboplfbrettd7655fr4n2y
   '@heroicons/react': 2.0.13_react@18.2.0
@@ -352,6 +354,10 @@ packages:
 
   /@datastructures-js/heap/4.3.1:
     resolution: {integrity: sha512-au4fYa4fprREES58FnMOTFjg8lCYpSenF5tBu8C/iweMaj02rAOZUqlLUCqR3HIWzNfgTeCmAiyRHdjJVHrsIQ==}
+    dev: false
+
+  /@datastructures-js/linked-list/5.2.5:
+    resolution: {integrity: sha512-YhlkDh7yMOaJ2bGgmrwvyF3vCrMELo2ERTiRxFMMkQF6+5n6expCBoseHtMIwe8fHJu1bzT7IaEHRU58hBoMUQ==}
     dev: false
 
   /@datastructures-js/priority-queue/6.2.0:

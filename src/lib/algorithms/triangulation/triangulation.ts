@@ -1,40 +1,76 @@
-import {
-  PriorityQueue,
-  MinPriorityQueue,
-  MaxPriorityQueue,
-  ICompare,
-  IGetCompareValue,
-} from "@datastructures-js/priority-queue";
+import { PriorityQueue, ICompare } from "@datastructures-js/priority-queue";
+import { DoublyLinkedList } from "@datastructures-js/linked-list";
 import { klona } from "klona";
 
-import { Point } from "../../geometry";
+import { Point, Vector } from "../../geometry";
+import { findAngle } from "../../geometry/findAngle";
+import { checkClockwiseTurn, ORIENTATION, radToDegrees } from "../../helper";
 
-type IPolygon = { points: Point[] };
 type IEvent = {
   point: Point;
   type: "start" | "end" | "split" | "merge" | "regular";
 };
 
-function createPriorityQueue(vertices: Point[]) {
-  const comparePoints: ICompare<Point> = (a: Point, b: Point) => {
-    if (a.y > b.y) {
-      return 1;
-    } else if (a.y < b.y) {
-      return -1;
-    }
-    return 0;
-  };
+function createEdgeList(vertices: Point[]) {
+  const edgeList = new DoublyLinkedList<Vector>();
+  vertices.forEach((vertex, index) => {
+    const nextVertex = vertices[(index + 1) % vertices.length];
+    const edge = new Vector(vertex, nextVertex);
+    edgeList.insertLast(edge);
+  });
+  return edgeList;
+}
 
-  const pq = PriorityQueue.fromArray<Point>(vertices, comparePoints);
+function createPriorityQueue(events: IEvent[]) {
+  const compareEvents: ICompare<IEvent> = (a: IEvent, b: IEvent) => {
+    if (a.point.y > b.point.y) {
+      return 1;
+    }
+    return -1;
+  };
+  const pq = PriorityQueue.fromArray<IEvent>(events, compareEvents);
   return pq;
 }
 
-function createVertexEvents(vertices: Point[]) {
-  return undefined;
-}
+function createVertexEvents(edgeList: DoublyLinkedList<Vector>): IEvent[] {
+  const events: IEvent[] = [];
+  edgeList.forEach((edge) => {
+    const prevEdge = edge.hasPrev() ? edge.getPrev() : edgeList.tail();
+    const u = prevEdge.getValue().a;
+    const v = edge.getValue().a;
+    const w = edge.getValue().b;
 
-function createDoublyLinkedList(vertices: Point[]) {
-  return undefined;
+    const orientation = checkClockwiseTurn(u, v, w);
+    const invertAngle = orientation === ORIENTATION.CW;
+    const rawAngle = findAngle(u, v, w);
+    const innerAngle = invertAngle ? 2 * Math.PI - rawAngle : rawAngle;
+
+    console.log({
+      u: u.toString(),
+      v: v.toString(),
+      w: w.toString(),
+      angle: radToDegrees(innerAngle),
+    });
+
+    const vAboveNeighbors = u.y >= v.y && w.y >= v.y;
+    const vBelowNeighbors = u.y < v.y && w.y < v.y;
+    const angleGreaterThan180 = innerAngle > Math.PI;
+    const angleLessThan180 = innerAngle < Math.PI;
+
+    let eventType: IEvent["type"] = "regular";
+
+    if (vAboveNeighbors && angleLessThan180) {
+      eventType = "start";
+    } else if (vAboveNeighbors && angleGreaterThan180) {
+      eventType = "split";
+    } else if (vBelowNeighbors && angleLessThan180) {
+      eventType = "end";
+    } else if (vBelowNeighbors && angleGreaterThan180) {
+      eventType = "merge";
+    }
+    events.push({ type: eventType, point: v });
+  });
+  return events;
 }
 
 function createSearchTree() {
@@ -94,12 +130,19 @@ function onRegularEvent(event: IEvent) {
   return undefined;
 }
 
-function partitionIntoMonotonePolygons(polygon: IPolygon) {
+function partitionIntoMonotonePolygons(
+  vertices: Point[],
+  edgeList: DoublyLinkedList<Vector>
+) {
   // Create data structures
-  const vertices = klona(polygon.points);
-  const events = createVertexEvents(vertices);
-  const pq = createPriorityQueue(vertices);
-  const edges = createDoublyLinkedList(vertices);
+  const events = createVertexEvents(edgeList);
+  console.table(
+    events.map((event) => ({
+      type: event.type,
+      point: `${event.point.x}, ${event.point.y}`,
+    }))
+  );
+  const pq = createPriorityQueue(events);
   const tree = createSearchTree();
 
   // Process vertices and their events
@@ -122,7 +165,12 @@ function partitionIntoMonotonePolygons(polygon: IPolygon) {
   return undefined;
 }
 
-export function triangulatePolygon(polygon: IPolygon) {
-  const monotonePolygons = partitionIntoMonotonePolygons(polygon);
+export function triangulatePolygon(points: Point[]) {
+  if (points.length < 3) {
+    return undefined;
+  }
+  const vertices = klona(points);
+  const edgeList = createEdgeList(vertices);
+  const monotonePolygons = partitionIntoMonotonePolygons(vertices, edgeList);
   return undefined;
 }
