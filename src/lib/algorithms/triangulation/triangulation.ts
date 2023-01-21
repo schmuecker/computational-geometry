@@ -8,7 +8,7 @@ import { klona } from "klona";
 
 import { Point, Vector } from "../../geometry";
 import { findAngle } from "../../geometry/findAngle";
-import { checkClockwiseTurn, ORIENTATION, radToDegrees } from "../../helper";
+import { checkClockwiseTurn, ORIENTATION } from "../../helper";
 
 type IEvent = {
   point: Point;
@@ -54,13 +54,6 @@ function createVertexEvents(edgeList: DoublyLinkedList<Vector>): IEvent[] {
     const invertAngle = orientation === ORIENTATION.CW;
     const rawAngle = findAngle(u, v, w);
     const innerAngle = invertAngle ? 2 * Math.PI - rawAngle : rawAngle;
-
-    console.log({
-      u: u.toString(),
-      v: v.toString(),
-      w: w.toString(),
-      angle: radToDegrees(innerAngle),
-    });
 
     const vAboveNeighbors = u.y >= v.y && w.y >= v.y;
     const vBelowNeighbors = u.y < v.y && w.y < v.y;
@@ -113,6 +106,10 @@ function handleStartEvent(
     })
     .getValue();
   const helper_e_i = v_i;
+  console.log("Start: insert into tree", {
+    edge: e_i,
+    helper: helper_e_i,
+  });
   tree.insert({
     // key: e_i.a.x,
     edge: e_i,
@@ -181,7 +178,7 @@ function handleEndEvent(
   const e_i = edgeList.find((edge) => {
     return edge.getValue().b.equals(v_i.point);
   });
-  const e_i_minus_1 = e_i.getPrev();
+  const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
   let helper_e_i_minus_1: ITreeNode["helper"];
   const searchFn = (node: BinarySearchTreeNode<ITreeNode>) => {
     const edge = node.getValue().edge;
@@ -190,14 +187,11 @@ function handleEndEvent(
     }
   };
   const abortFn = () => {
-    return Boolean(e_i_minus_1);
+    return Boolean(helper_e_i_minus_1);
   };
   tree.traversePreOrder(searchFn, abortFn);
-  if (!helper_e_i_minus_1) {
-    throw new Error("Could not find helper(e_i-1)");
-  }
-
-  if (helper_e_i_minus_1.type === "merge") {
+  console.log("end event: helper(e_i-1)", helper_e_i_minus_1);
+  if (helper_e_i_minus_1 && helper_e_i_minus_1.type === "merge") {
     // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
     const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
     edgeList.insertLast(diagonal);
@@ -220,7 +214,7 @@ function handleMergeEvent(
   const e_i = edgeList.find((edge) => {
     return edge.getValue().b.equals(v_i.point);
   });
-  const e_i_minus_1 = e_i.getPrev();
+  const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
   let helper_e_i_minus_1: ITreeNode["helper"];
   const searchFn1 = (node: BinarySearchTreeNode<ITreeNode>) => {
     const edge = node.getValue().edge;
@@ -229,14 +223,11 @@ function handleMergeEvent(
     }
   };
   const abortFn1 = () => {
-    return Boolean(e_i_minus_1);
+    return Boolean(helper_e_i_minus_1);
   };
   tree.traversePreOrder(searchFn1, abortFn1);
-  if (!helper_e_i_minus_1) {
-    throw new Error("Could not find helper(e_i-1)");
-  }
 
-  if (helper_e_i_minus_1.type === "merge") {
+  if (helper_e_i_minus_1 && helper_e_i_minus_1.type === "merge") {
     // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
     const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
     edgeList.insertLast(diagonal);
@@ -251,11 +242,14 @@ function handleMergeEvent(
   let e_j: BinarySearchTreeNode<ITreeNode>;
   const searchFn2 = (node: BinarySearchTreeNode<ITreeNode>) => {
     const edge = node.getValue().edge;
+    console.log("Merge: search", edge);
     if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
+      console.log("Merge: edge is left of v_i");
       if (
         (edge.a.y < v_i.point.y && edge.b.y > v_i.point.y) ||
-        (edge.b.y < v_i.point.y && edge.a.y > v_i.point.y)
+        (edge.a.y > v_i.point.y && edge.b.y < v_i.point.y)
       ) {
+        console.log("Merge: v_i is between edge points");
         e_j = node;
       }
     }
@@ -263,9 +257,10 @@ function handleMergeEvent(
   const abortFn2 = () => {
     return Boolean(e_j);
   };
-  tree.traversePreOrder(searchFn2, abortFn2);
+  tree.traversePreOrder(searchFn2);
   if (!e_j) {
-    throw new Error("Could not find edge left of vertex");
+    console.error("Merge Event: Could not find e_j");
+    return;
   }
   // if (helper( 𝑒_𝑗 ) is a merge vertex) then
   if (e_j.getValue().helper.type === "merge") {
@@ -289,26 +284,26 @@ function handleRegularEvent(
   const e_i = edgeList.find((edge) => {
     return edge.getValue().b.equals(v_i.point);
   });
+  console.log("regular event", { v_i, e_i });
   // if (the interior of P is right of 𝑣_𝑖) then {
-  if (e_i.getValue().a.x < v_i.point.x) {
-    const e_i_minus_1 = e_i.getPrev();
+  if (e_i.getValue().a.x > v_i.point.x) {
+    console.log("Interior is right of v_i");
+    const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
     let helper_e_i_minus_1: ITreeNode["helper"];
     const searchFn1 = (node: BinarySearchTreeNode<ITreeNode>) => {
+      if (!node) return;
       const edge = node.getValue().edge;
       if (edge.equals(e_i_minus_1.getValue())) {
         helper_e_i_minus_1 = node.getValue().helper;
       }
     };
     const abortFn1 = () => {
-      return Boolean(e_i_minus_1);
+      return Boolean(helper_e_i_minus_1);
     };
     tree.traversePreOrder(searchFn1, abortFn1);
-    if (!helper_e_i_minus_1) {
-      throw new Error("Could not find helper(e_i-1)");
-    }
 
     // if (helper( 𝑒_𝑖−1 ) is a merge vertex) then {
-    if (helper_e_i_minus_1.type === "merge") {
+    if (helper_e_i_minus_1 && helper_e_i_minus_1.type === "merge") {
       // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
       const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
       edgeList.insertLast(diagonal);
@@ -331,6 +326,7 @@ function handleRegularEvent(
     let e_j: BinarySearchTreeNode<ITreeNode>;
     const searchFn2 = (node: BinarySearchTreeNode<ITreeNode>) => {
       const edge = node.getValue().edge;
+      console.log("Search for ");
       if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
         if (
           (edge.a.y < v_i.point.y && edge.b.y > v_i.point.y) ||
@@ -345,8 +341,9 @@ function handleRegularEvent(
     };
     tree.traversePreOrder(searchFn2, abortFn2);
     if (!e_j) {
-      throw new Error("Could not find edge left of vertex");
+      return;
     }
+
     // if (helper( 𝑒_𝑗 ) is a merge vertex) then
     if (e_j.getValue().helper.type === "merge") {
       // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to edge list;
@@ -389,18 +386,23 @@ function partitionIntoMonotonePolygons(
     const event = pq.dequeue();
     // Process event based on type
     if (event.type === "start") {
+      console.log('Processing "start" event: ', event);
       handleStartEvent(event, tree, edgeList);
     } else if (event.type === "split") {
+      console.log('Processing "split" event: ', event);
       handleSplitEvent(event, tree, edgeList);
     } else if (event.type === "end") {
+      console.log('Processing "end" event: ', event);
       handleEndEvent(event, tree, edgeList);
     } else if (event.type === "merge") {
+      console.log('Processing "merge" event: ', event);
       handleMergeEvent(event, tree, edgeList);
     } else if (event.type === "regular") {
+      console.log('Processing "regular" event: ', event);
       handleRegularEvent(event, tree, edgeList);
     }
   }
-
+  console.log("Finished.");
   return undefined;
 }
 

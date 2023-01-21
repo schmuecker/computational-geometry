@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { triangulatePolygon } from "../../lib/algorithms/triangulation/triangulation";
 
 import { Point } from "../../lib/geometry";
 import { ResetButton } from "../Button/ResetButton";
+import { IconButton } from "../Button/IconButton";
 import TriangulationCanvas from "./TriangulationCanvas/TriangulationCanvas";
+import { PlayIcon } from "@heroicons/react/24/outline";
 
 function Triangulation() {
   const [points, setPoints] = useState<Point[]>([]);
-  console.log(triangulatePolygon(points));
 
   const handleAddPoint = (newPoint: Point) => {
     const fitleredPoints = points.filter((point) => {
@@ -20,6 +21,10 @@ function Triangulation() {
     setPoints(newPoints);
   };
 
+  const handleDraw = () => {
+    console.log(triangulatePolygon(points));
+  };
+
   const handleReset = () => {
     setPoints([]);
   };
@@ -27,7 +32,8 @@ function Triangulation() {
   return (
     <div>
       <div className="mb-8 flex w-full items-end justify-between">
-        <div>
+        <div className="flex space-x-2">
+          <IconButton onClick={handleDraw} icon={<PlayIcon />} />
           <ResetButton onClick={handleReset} />
         </div>
       </div>
