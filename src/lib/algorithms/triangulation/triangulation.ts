@@ -198,7 +198,7 @@ function handleEndEvent(
   }
 
   if (helper_e_i_minus_1.type === "merge") {
-    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to doubly linked list;
+    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
     const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
     edgeList.insertLast(diagonal);
   }
@@ -237,7 +237,7 @@ function handleMergeEvent(
   }
 
   if (helper_e_i_minus_1.type === "merge") {
-    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to doubly linked list;
+    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
     const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
     edgeList.insertLast(diagonal);
   }
@@ -269,30 +269,94 @@ function handleMergeEvent(
   }
   // if (helper( 𝑒_𝑗 ) is a merge vertex) then
   if (e_j.getValue().helper.type === "merge") {
-    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to doubly linked list;
+    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to edge list;
     const helper_e_j = e_j.getValue().helper;
     const diagonal = new Vector(v_i.point, helper_e_j.point);
     edgeList.insertLast(diagonal);
   }
   // helper( 𝑒_𝑗 ):= 𝑣_𝑖;
   e_j.setValue({ ...e_j.getValue(), helper: v_i });
+
   return undefined;
 }
 
-function handleRegularEvent(event: IEvent, tree: BinarySearchTree<ITreeNode>) {
+function handleRegularEvent(
+  event: IEvent,
+  tree: BinarySearchTree<ITreeNode>,
+  edgeList: DoublyLinkedList<Vector>
+) {
+  const v_i = event;
+  const e_i = edgeList.find((edge) => {
+    return edge.getValue().b.equals(v_i.point);
+  });
   // if (the interior of P is right of 𝑣_𝑖) then {
-  //    if (helper( 𝑒_𝑖−1) is a merge vertex) then {
-  //      Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to doubly linked list;
-  //    }
-  //   Remove 𝑒_𝑖−1 from tree;
-  //   Add 𝑒_i with helper( 𝑒_𝑖 ):= 𝑣_𝑖 to tree;
-  // } else {
-  //  Search in tree for the edge 𝑒_𝑗 left of 𝑣_𝑖;
-  //  if (helper( 𝑒_𝑗 ) is a merge vertex) then {
-  //    Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to doubly linked list;
-  //  }
-  //  helper( 𝑒_𝑗 ):= 𝑣_𝑖;
-  // }
+  if (e_i.getValue().a.x < v_i.point.x) {
+    const e_i_minus_1 = e_i.getPrev();
+    let helper_e_i_minus_1: ITreeNode["helper"];
+    const searchFn1 = (node: BinarySearchTreeNode<ITreeNode>) => {
+      const edge = node.getValue().edge;
+      if (edge.equals(e_i_minus_1.getValue())) {
+        helper_e_i_minus_1 = node.getValue().helper;
+      }
+    };
+    const abortFn1 = () => {
+      return Boolean(e_i_minus_1);
+    };
+    tree.traversePreOrder(searchFn1, abortFn1);
+    if (!helper_e_i_minus_1) {
+      throw new Error("Could not find helper(e_i-1)");
+    }
+
+    // if (helper( 𝑒_𝑖−1 ) is a merge vertex) then {
+    if (helper_e_i_minus_1.type === "merge") {
+      // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
+      const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
+      edgeList.insertLast(diagonal);
+    }
+    // Remove 𝑒_𝑖−1 from tree;
+    tree.remove({
+      edge: e_i_minus_1.getValue(),
+      helper: helper_e_i_minus_1,
+    });
+
+    //   Add 𝑒_i with helper( 𝑒_𝑖 ):= 𝑣_𝑖 to tree;
+    const helper_e_i = v_i;
+    tree.insert({
+      // key: e_i.a.x,
+      edge: e_i.getValue(),
+      helper: helper_e_i,
+    });
+  } else {
+    // Search in tree for the edge 𝑒_𝑗 left of 𝑣_𝑖 ;
+    let e_j: BinarySearchTreeNode<ITreeNode>;
+    const searchFn2 = (node: BinarySearchTreeNode<ITreeNode>) => {
+      const edge = node.getValue().edge;
+      if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
+        if (
+          (edge.a.y < v_i.point.y && edge.b.y > v_i.point.y) ||
+          (edge.b.y < v_i.point.y && edge.a.y > v_i.point.y)
+        ) {
+          e_j = node;
+        }
+      }
+    };
+    const abortFn2 = () => {
+      return Boolean(e_j);
+    };
+    tree.traversePreOrder(searchFn2, abortFn2);
+    if (!e_j) {
+      throw new Error("Could not find edge left of vertex");
+    }
+    // if (helper( 𝑒_𝑗 ) is a merge vertex) then
+    if (e_j.getValue().helper.type === "merge") {
+      // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to edge list;
+      const helper_e_j = e_j.getValue().helper;
+      const diagonal = new Vector(v_i.point, helper_e_j.point);
+      edgeList.insertLast(diagonal);
+    }
+    // helper( 𝑒_𝑗 ):= 𝑣_𝑖;
+    e_j.setValue({ ...e_j.getValue(), helper: v_i });
+  }
 
   return undefined;
 }
