@@ -1,3 +1,12 @@
+import {
+  PriorityQueue,
+  MinPriorityQueue,
+  MaxPriorityQueue,
+  ICompare,
+  IGetCompareValue,
+} from "@datastructures-js/priority-queue";
+import { klona } from "klona";
+
 import { Point } from "../../geometry";
 
 type IPolygon = { points: Point[] };
@@ -6,8 +15,18 @@ type IEvent = {
   type: "start" | "end" | "split" | "merge" | "regular";
 };
 
-function createPriorityQueue(events: IEvent[]) {
-  return undefined;
+function createPriorityQueue(vertices: Point[]) {
+  const comparePoints: ICompare<Point> = (a: Point, b: Point) => {
+    if (a.y > b.y) {
+      return 1;
+    } else if (a.y < b.y) {
+      return -1;
+    }
+    return 0;
+  };
+
+  const pq = PriorityQueue.fromArray<Point>(vertices, comparePoints);
+  return pq;
 }
 
 function createVertexEvents(vertices: Point[]) {
@@ -77,15 +96,15 @@ function onRegularEvent(event: IEvent) {
 
 function partitionIntoMonotonePolygons(polygon: IPolygon) {
   // Create data structures
-  const vertices = polygon.points;
+  const vertices = klona(polygon.points);
   const events = createVertexEvents(vertices);
-  const pq = createPriorityQueue(events);
+  const pq = createPriorityQueue(vertices);
   const edges = createDoublyLinkedList(vertices);
   const tree = createSearchTree();
 
   // Process vertices and their events
-  while (pq.length > 0) {
-    const event = pq.pop();
+  while (pq.size() > 0) {
+    const event = pq.dequeue();
     // Process event based on type
     if (event.type === "start") {
       onStartEvent(event);
