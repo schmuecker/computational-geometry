@@ -136,6 +136,7 @@ function partitionIntoMonotonePolygons(
 ) {
   // Create data structures
   const events = createVertexEvents(edgeList);
+  console.log("Events: ");
   console.table(
     events.map((event) => ({
       type: event.type,
@@ -143,6 +144,13 @@ function partitionIntoMonotonePolygons(
     }))
   );
   const pq = createPriorityQueue(events);
+  console.log("Priority Queue: ");
+  console.table(
+    pq.toArray().map((event) => ({
+      type: event.type,
+      point: `${event.point.x}, ${event.point.y}`,
+    }))
+  );
   const tree = createSearchTree();
 
   // Process vertices and their events
