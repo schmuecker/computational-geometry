@@ -18,6 +18,10 @@ class Vector {
     this.v_y = b.y - a.y;
   }
 
+  equals(vectorB: Vector) {
+    return this.a.equals(vectorB.a) && this.b.equals(vectorB.b);
+  }
+
   cross(vectorB: Vector) {
     return this.v_x * vectorB.v_y - vectorB.v_x * this.v_y;
   }

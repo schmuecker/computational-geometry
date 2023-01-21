@@ -11,8 +11,12 @@ class Point {
     this.y = y;
   }
 
+  equals(point: Point) {
+    return this.x === point.x && this.y === point.y;
+  }
+
   toString() {
-    return `Point { x: ${this.x}, y: ${this.y} }`;
+    return `(${this.x}, y: ${this.y})`;
   }
 }
 
