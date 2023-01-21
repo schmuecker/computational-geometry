@@ -107,6 +107,7 @@ function handleStartEvent(
     .getValue();
   const helper_e_i = v_i;
   console.log("Start: insert into tree", {
+    // key: e_i.a.x,
     edge: e_i,
     helper: helper_e_i,
   });
@@ -115,6 +116,7 @@ function handleStartEvent(
     edge: e_i,
     helper: helper_e_i,
   });
+  console.log("Insert: Tree count", tree.count());
   return undefined;
 }
 
@@ -165,6 +167,7 @@ function handleSplitEvent(
     edge: e_i,
     helper: helper_e_i,
   });
+  console.log("Insert: Tree count", tree.count());
   return undefined;
 }
 
@@ -201,6 +204,7 @@ function handleEndEvent(
     edge: e_i_minus_1.getValue(),
     helper: helper_e_i_minus_1,
   });
+  console.log("Removed. Tree count", tree.count());
   return undefined;
 }
 
@@ -215,6 +219,7 @@ function handleMergeEvent(
     return edge.getValue().b.equals(v_i.point);
   });
   const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
+  console.log("merge", { v_i, e_i, e_i_minus_1 });
   let helper_e_i_minus_1: ITreeNode["helper"];
   const searchFn1 = (node: BinarySearchTreeNode<ITreeNode>) => {
     const edge = node.getValue().edge;
@@ -226,23 +231,27 @@ function handleMergeEvent(
     return Boolean(helper_e_i_minus_1);
   };
   tree.traversePreOrder(searchFn1, abortFn1);
-
-  if (helper_e_i_minus_1 && helper_e_i_minus_1.type === "merge") {
-    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
-    const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
-    edgeList.insertLast(diagonal);
+  console.log("found helper_e_i_minus_1", { helper_e_i_minus_1 });
+  if (helper_e_i_minus_1) {
+    if (helper_e_i_minus_1.type === "merge") {
+      // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
+      const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
+      edgeList.insertLast(diagonal);
+    }
+    // Remove 𝑒_𝑖−1 from tree;
+    tree.remove({
+      edge: e_i_minus_1.getValue(),
+      helper: helper_e_i_minus_1,
+    });
+    console.log("Removed. Tree count", tree.count());
   }
-  // Remove 𝑒_𝑖−1 from tree;
-  tree.remove({
-    edge: e_i_minus_1.getValue(),
-    helper: helper_e_i_minus_1,
-  });
 
   // Search in tree for the edge 𝑒_𝑗 left of 𝑣_𝑖 ;
   let e_j: BinarySearchTreeNode<ITreeNode>;
   const searchFn2 = (node: BinarySearchTreeNode<ITreeNode>) => {
     const edge = node.getValue().edge;
     console.log("Merge: search", edge);
+    console.log("Insert: Tree count", tree.count());
     if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
       console.log("Merge: edge is left of v_i");
       if (
@@ -313,6 +322,7 @@ function handleRegularEvent(
       edge: e_i_minus_1.getValue(),
       helper: helper_e_i_minus_1,
     });
+    console.log("Removed. Tree count", tree.count());
 
     //   Add 𝑒_i with helper( 𝑒_𝑖 ):= 𝑣_𝑖 to tree;
     const helper_e_i = v_i;
@@ -321,6 +331,7 @@ function handleRegularEvent(
       edge: e_i.getValue(),
       helper: helper_e_i,
     });
+    console.log("Insert: Tree count", tree.count());
   } else {
     // Search in tree for the edge 𝑒_𝑗 left of 𝑣_𝑖 ;
     let e_j: BinarySearchTreeNode<ITreeNode>;
