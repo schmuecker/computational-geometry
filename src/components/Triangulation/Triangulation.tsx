@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { triangulatePolygon } from "../../lib/algorithms/triangulation/triangulation";
 
-import { Point } from "../../lib/geometry";
+import { Point, Vector } from "../../lib/geometry";
 import { ResetButton } from "../Button/ResetButton";
 import { IconButton } from "../Button/IconButton";
 import TriangulationCanvas from "./TriangulationCanvas/TriangulationCanvas";
@@ -9,6 +9,12 @@ import { PlayIcon } from "@heroicons/react/24/outline";
 
 function Triangulation() {
   const [points, setPoints] = useState<Point[]>([]);
+  const [diagonals, setDiagonals] = useState<Vector[]>([]);
+
+  const vectors = points.map((point, index) => {
+    const nextIndex = (index + 1) % points.length;
+    return new Vector(point, points[nextIndex]);
+  });
 
   const handleAddPoint = (newPoint: Point) => {
     const fitleredPoints = points.filter((point) => {
@@ -22,11 +28,13 @@ function Triangulation() {
   };
 
   const handleDraw = () => {
-    console.log(triangulatePolygon(points));
+    const newDiagonals = triangulatePolygon(points) || [];
+    setDiagonals(newDiagonals);
   };
 
   const handleReset = () => {
     setPoints([]);
+    setDiagonals([]);
   };
 
   return (
@@ -39,7 +47,8 @@ function Triangulation() {
       </div>
       <TriangulationCanvas
         points={points}
-        vectors={[]}
+        vectors={vectors}
+        diagonals={diagonals}
         onAddPoint={handleAddPoint}
       />
     </div>

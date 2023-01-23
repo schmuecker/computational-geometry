@@ -12,28 +12,40 @@ function CanvasPoint({ point }: CanvasPointProps) {
   return (
     <>
       <Circle width={16} height={16} x={x} y={y} fill="white" />
-      <Text text={`${x}, ${y}`} fill="white" x={x - 25} y={y - 25} />
+      <Text
+        text={`${Math.floor(x)}, ${Math.floor(y)}`}
+        fill="white"
+        x={x - 25}
+        y={y - 25}
+      />
     </>
   );
 }
 
 interface CanvasVectorProps {
   vector: Vector;
+  stroke?: string;
 }
 
-function CanvasVector({ vector }: CanvasVectorProps) {
+function CanvasVector({ vector, stroke }: CanvasVectorProps) {
   const { a, b } = vector;
   const points = [a.x, a.y, b.x, b.y];
-  return <Line points={points} stroke="#ea580c" strokeWidth={3} />;
+  return <Line points={points} stroke={stroke || "white"} strokeWidth={3} />;
 }
 
 interface CanvasProps {
   points: Point[];
   vectors: Vector[];
+  diagonals: Vector[];
   onAddPoint: (point: Point) => void;
 }
 
-function TriangulationCanvas({ points, vectors, onAddPoint }: CanvasProps) {
+function TriangulationCanvas({
+  points,
+  vectors,
+  diagonals,
+  onAddPoint,
+}: CanvasProps) {
   const handleCanvasClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const isRightClick = e.evt.button === 2;
     if (isRightClick) return;
@@ -59,7 +71,18 @@ function TriangulationCanvas({ points, vectors, onAddPoint }: CanvasProps) {
     >
       <Layer>
         {vectors.map((vector) => {
-          return <CanvasVector key={vector.id} vector={vector} />;
+          return (
+            <CanvasVector key={vector.id} vector={vector} stroke="#ADBCE7" />
+          );
+        })}
+        {diagonals.map((diagonal) => {
+          return (
+            <CanvasVector
+              key={diagonal.id}
+              vector={diagonal}
+              stroke="#ea580c"
+            />
+          );
         })}
         {points.map((point) => {
           return <CanvasPoint key={point.id} point={point} />;

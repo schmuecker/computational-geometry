@@ -1,5 +1,4 @@
 import { PriorityQueue, ICompare } from "@datastructures-js/priority-queue";
-import { DoublyLinkedList } from "@datastructures-js/linked-list";
 import {
   BinarySearchTree,
   BinarySearchTreeNode,
@@ -9,49 +8,47 @@ import { klona } from "klona";
 import { Point, Vector } from "../../geometry";
 import { findAngle } from "../../geometry/findAngle";
 import { checkClockwiseTurn, ORIENTATION } from "../../helper";
+import { EdgeList } from "./edgeList/edgeList";
 
-type IEvent = {
+type IVertex = {
   point: Point;
   type: "start" | "end" | "split" | "merge" | "regular";
 };
 
-type ITreeNode = {
-  // key: Point["x"];
-  edge: Vector;
-  helper: IEvent;
+type IEdge = {
+  vector: Vector;
+  index: number;
 };
 
-function createEdgeList(vertices: Point[]) {
-  const edgeList = new DoublyLinkedList<Vector>();
-  vertices.forEach((vertex, index) => {
-    const nextVertex = vertices[(index + 1) % vertices.length];
-    const edge = new Vector(vertex, nextVertex);
-    edgeList.insertLast(edge);
-  });
-  return edgeList;
-}
+type ITreeNode = {
+  key: number;
+  edge: IEdge;
+  helper: IVertex;
+};
 
-function createPriorityQueue(events: IEvent[]) {
-  const compareEvents: ICompare<IEvent> = (a: IEvent, b: IEvent) => {
+function createPriorityQueue(events: IVertex[]) {
+  const compareEvents: ICompare<IVertex> = (a: IVertex, b: IVertex) => {
     if (a.point.y > b.point.y) {
       return 1;
     }
     return -1;
   };
-  const pq = PriorityQueue.fromArray<IEvent>(events, compareEvents);
+  const pq = PriorityQueue.fromArray<IVertex>(events, compareEvents);
   return pq;
 }
 
-function createVertexEvents(edgeList: DoublyLinkedList<Vector>): IEvent[] {
-  const events: IEvent[] = [];
-  edgeList.forEach((edge) => {
-    const prevEdge = edge.hasPrev() ? edge.getPrev() : edgeList.tail();
-    const u = prevEdge.getValue().a;
-    const v = edge.getValue().a;
-    const w = edge.getValue().b;
+function createVertexEvents(edgeList: EdgeList): IVertex[] {
+  const events: IVertex[] = [];
+  edgeList.getEdges().forEach((edge) => {
+    // Circular linked list
+    const prevEdge = edgeList.getPrevEdgeOfEdge(edge);
+    const u = prevEdge.getValue().vector.a;
+    const v = edge.getValue().vector.a;
+    const w = edge.getValue().vector.b;
 
+    // Calculate inner angle
     const orientation = checkClockwiseTurn(u, v, w);
-    const invertAngle = orientation === ORIENTATION.CW;
+    const invertAngle = orientation === ORIENTATION.CCW;
     const rawAngle = findAngle(u, v, w);
     const innerAngle = invertAngle ? 2 * Math.PI - rawAngle : rawAngle;
 
@@ -60,7 +57,7 @@ function createVertexEvents(edgeList: DoublyLinkedList<Vector>): IEvent[] {
     const angleGreaterThan180 = innerAngle > Math.PI;
     const angleLessThan180 = innerAngle < Math.PI;
 
-    let eventType: IEvent["type"] = "regular";
+    let eventType: IVertex["type"] = "regular";
 
     if (vAboveNeighbors && angleLessThan180) {
       eventType = "start";
@@ -71,6 +68,7 @@ function createVertexEvents(edgeList: DoublyLinkedList<Vector>): IEvent[] {
     } else if (vBelowNeighbors && angleGreaterThan180) {
       eventType = "merge";
     }
+
     events.push({ type: eventType, point: v });
   });
   return events;
@@ -78,42 +76,105 @@ function createVertexEvents(edgeList: DoublyLinkedList<Vector>): IEvent[] {
 
 function createSearchTree() {
   const compareFn = (a: ITreeNode, b: ITreeNode) => {
-    if (a.edge.equals(b.edge)) {
+    console.log("compare", a.key, b.key);
+    // Equal keys
+    if (a.key === b.key) {
       return 0;
     }
-    if (a.edge.a.x > b.edge.a.x) {
+    // Different keys when searching for key
+    if (a.key !== b.key && (!a?.edge || !b?.edge)) {
+      if (a.key > b.key) {
+        return 1;
+      } else {
+        return -1;
+      }
+    }
+    // Equal coordinates
+    if (a.edge.vector.equals(b.edge.vector)) {
+      return 0;
+    }
+    // a is right of b
+    if (a.edge.vector.a.x > b.edge.vector.a.x) {
       return 1;
-    } else if (a.edge.a.x < b.edge.a.x) {
+      // a is left of b
+    } else if (a.edge.vector.a.x < b.edge.vector.a.x) {
       return -1;
     } else {
       return 0;
     }
   };
-  const tree = new BinarySearchTree<ITreeNode>(compareFn);
+  const tree = new BinarySearchTree<ITreeNode>(compareFn, { key: "key" });
   return tree;
 }
 
+function findInTree(key: number, tree: BinarySearchTree<ITreeNode>) {
+  let resultNode: IFoundNode = undefined;
+  const searchFn = (node: BinarySearchTreeNode<ITreeNode>) => {
+    if (node.getValue().key === key) {
+      resultNode = node;
+    }
+  };
+  const abortFn = () => {
+    return Boolean(resultNode);
+  };
+  tree.traversePreOrder(searchFn, abortFn);
+  if (!resultNode) {
+    throw Error(`Could not find node with key ${key}"`);
+  }
+  return resultNode;
+}
+
+type IFoundNode = BinarySearchTreeNode<ITreeNode> | undefined;
+
+function getEdgeLeftOfVertex(
+  vertex: IVertex,
+  tree: BinarySearchTree<ITreeNode>
+): IFoundNode {
+  let e_j: IFoundNode = undefined;
+  const searchFn = (node: BinarySearchTreeNode<ITreeNode>) => {
+    const edge = node.getValue().edge;
+    console.log("search for", vertex.point);
+    console.log({ edge });
+    const u = edge.vector.a;
+    const v = vertex.point;
+    const w = edge.vector.b;
+    const isPointLeftOfEdge = checkClockwiseTurn(u, v, w) === ORIENTATION.CCW;
+    if (isPointLeftOfEdge) {
+      if (
+        edge.vector.a.y < vertex.point.y &&
+        edge.vector.b.y > vertex.point.y
+      ) {
+        e_j = node;
+      }
+    }
+  };
+  const abortFn = () => {
+    return Boolean(e_j);
+  };
+  tree.traversePreOrder(searchFn, abortFn);
+  if (!e_j) {
+    throw Error("No edge found left of vertex");
+  }
+  return e_j;
+}
+
 function handleStartEvent(
-  event: IEvent,
+  event: IVertex,
   tree: BinarySearchTree<ITreeNode>,
-  edgeList: DoublyLinkedList<Vector>
+  edgeList: EdgeList
 ) {
   // Add 𝑒_𝑖 with helper(𝑒_𝑖):= 𝑣_𝑖 to tree;
   const v_i = event;
-  const e_i = edgeList
-    .find((edge) => {
-      return edge.getValue().b.equals(v_i.point);
-    })
-    .getValue();
+  const e_i = edgeList.getEdgeOfVertex(v_i);
   const helper_e_i = v_i;
   console.log("Start: insert into tree", {
-    // key: e_i.a.x,
-    edge: e_i,
+    key: e_i.getValue().index,
+    edge: e_i.getValue(),
     helper: helper_e_i,
   });
   tree.insert({
-    // key: e_i.a.x,
-    edge: e_i,
+    key: e_i.getValue().index,
+    edge: e_i.getValue(),
     helper: helper_e_i,
   });
   console.log("Insert: Tree count", tree.count());
@@ -121,162 +182,113 @@ function handleStartEvent(
 }
 
 function handleSplitEvent(
-  event: IEvent,
+  event: IVertex,
   tree: BinarySearchTree<ITreeNode>,
-  edgeList: DoublyLinkedList<Vector>
+  edgeList: EdgeList,
+  diagonalsList: Vector[]
 ) {
   // Search in tree for the edge 𝑒 𝑗 left of 𝑣 𝑖;
   const v_i = event;
-  let e_j: BinarySearchTreeNode<ITreeNode>;
-  const searchFn = (node: BinarySearchTreeNode<ITreeNode>) => {
-    const edge = node.getValue().edge;
-    if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
-      if (
-        (edge.a.y < v_i.point.y && edge.b.y > v_i.point.y) ||
-        (edge.b.y < v_i.point.y && edge.a.y > v_i.point.y)
-      ) {
-        e_j = node;
-      }
-    }
-  };
-  const abortFn = () => {
-    return Boolean(e_j);
-  };
-  tree.traversePreOrder(searchFn, abortFn);
+  const e_i = edgeList.getEdgeOfVertex(v_i);
+  const e_j = getEdgeLeftOfVertex(v_i, tree);
   if (!e_j) {
-    throw new Error("Could not find edge left of vertex");
+    throw new Error("Split vertex: Could not find edge left of vertex");
   }
 
   // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to D;
   const helper_e_j = e_j.getValue().helper;
   const diagonal = new Vector(v_i.point, helper_e_j.point);
-  edgeList.insertLast(diagonal);
+  diagonalsList.push(diagonal);
 
   // helper( 𝑒_𝑗 ):= 𝑣_𝑖;
   e_j.setValue({ ...e_j.getValue(), helper: v_i });
 
   // Add 𝑒_𝑖 with helper( 𝑒_𝑖 ):= 𝑣_𝑖 to T;
-  const e_i = edgeList
-    .find((edge) => {
-      return edge.getValue().b.equals(v_i.point);
-    })
-    .getValue();
   const helper_e_i = v_i;
-  tree.insert({
-    // key: e_i.a.x,
-    edge: e_i,
+  console.log("Split: insert into tree", {
+    key: e_i.getValue().index,
+    edge: e_i.getValue(),
     helper: helper_e_i,
   });
-  console.log("Insert: Tree count", tree.count());
+  tree.insert({
+    key: e_i.getValue().index,
+    edge: e_i.getValue(),
+    helper: helper_e_i,
+  });
+
   return undefined;
 }
 
 function handleEndEvent(
-  event: IEvent,
+  event: IVertex,
   tree: BinarySearchTree<ITreeNode>,
-  edgeList: DoublyLinkedList<Vector>
+  edgeList: EdgeList,
+  diagonalsList: Vector[]
 ) {
   // if (helper( 𝑒_𝑖−1 ) is a merge vertex) then
   const v_i = event;
-  const e_i = edgeList.find((edge) => {
-    return edge.getValue().b.equals(v_i.point);
-  });
-  const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
-  let helper_e_i_minus_1: ITreeNode["helper"];
-  const searchFn = (node: BinarySearchTreeNode<ITreeNode>) => {
-    const edge = node.getValue().edge;
-    if (edge.equals(e_i_minus_1.getValue())) {
-      helper_e_i_minus_1 = node.getValue().helper;
-    }
-  };
-  const abortFn = () => {
-    return Boolean(helper_e_i_minus_1);
-  };
-  tree.traversePreOrder(searchFn, abortFn);
-  console.log("end event: helper(e_i-1)", helper_e_i_minus_1);
-  if (helper_e_i_minus_1 && helper_e_i_minus_1.type === "merge") {
+  const e_i = edgeList.getEdgeOfVertex(v_i);
+  const e_i_minus_1 = edgeList.getPrevEdgeOfEdge(e_i);
+  // const e_i_minus_1_node = tree.findKey(e_i_minus_1.getValue().index);
+  const e_i_minus_1_node = findInTree(e_i_minus_1.getValue().index, tree);
+  if (!e_i_minus_1_node) {
+    throw new Error("End vertex: Could not find e_i_minus_1_node in tree");
+  }
+
+  const helper_e_i_minus_1 = e_i_minus_1_node.getValue().helper;
+  if (helper_e_i_minus_1.type === "merge") {
     // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
     const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
-    edgeList.insertLast(diagonal);
+    diagonalsList.push(diagonal);
   }
   // Remove 𝑒_𝑖−1 from tree;
   tree.remove({
+    key: e_i_minus_1.getValue().index,
     edge: e_i_minus_1.getValue(),
     helper: helper_e_i_minus_1,
   });
-  console.log("Removed. Tree count", tree.count());
+
   return undefined;
 }
 
 function handleMergeEvent(
-  event: IEvent,
+  event: IVertex,
   tree: BinarySearchTree<ITreeNode>,
-  edgeList: DoublyLinkedList<Vector>
+  edgeList: EdgeList,
+  diagonalsList: Vector[]
 ) {
   // if (helper( 𝑒_𝑖−1 ) is a merge vertex) then {
   const v_i = event;
-  const e_i = edgeList.find((edge) => {
-    return edge.getValue().b.equals(v_i.point);
-  });
-  const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
-  console.log("merge", { v_i, e_i, e_i_minus_1 });
-  let helper_e_i_minus_1: ITreeNode["helper"];
-  const searchFn1 = (node: BinarySearchTreeNode<ITreeNode>) => {
-    const edge = node.getValue().edge;
-    if (edge.equals(e_i_minus_1.getValue())) {
-      helper_e_i_minus_1 = node.getValue().helper;
-    }
-  };
-  const abortFn1 = () => {
-    return Boolean(helper_e_i_minus_1);
-  };
-  tree.traversePreOrder(searchFn1, abortFn1);
-  console.log("found helper_e_i_minus_1", { helper_e_i_minus_1 });
-  if (helper_e_i_minus_1) {
-    if (helper_e_i_minus_1.type === "merge") {
-      // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
-      const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
-      edgeList.insertLast(diagonal);
-    }
-    // Remove 𝑒_𝑖−1 from tree;
-    tree.remove({
-      edge: e_i_minus_1.getValue(),
-      helper: helper_e_i_minus_1,
-    });
-    console.log("Removed. Tree count", tree.count());
+  const e_i = edgeList.getEdgeOfVertex(v_i);
+  const e_i_minus_1 = edgeList.getPrevEdgeOfEdge(e_i);
+
+  // const e_i_minus_1_node = tree.findKey(e_i_minus_1.getValue().index);
+  const e_i_minus_1_node = findInTree(e_i_minus_1.getValue().index, tree);
+  if (!e_i_minus_1_node) {
+    throw new Error("Merge vertex: Could not find e_i_minus_1_node in tree");
   }
 
+  const helper_e_i_minus_1 = e_i_minus_1_node.getValue().helper;
+  if (helper_e_i_minus_1.type === "merge") {
+    // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
+    const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
+    // Add Diagonals to extra List
+    diagonalsList.push(diagonal);
+  }
+  // Remove 𝑒_𝑖−1 from tree;
+  tree.remove(e_i_minus_1_node.getValue());
   // Search in tree for the edge 𝑒_𝑗 left of 𝑣_𝑖 ;
-  let e_j: BinarySearchTreeNode<ITreeNode>;
-  const searchFn2 = (node: BinarySearchTreeNode<ITreeNode>) => {
-    const edge = node.getValue().edge;
-    console.log("Merge: search", edge);
-    console.log("Insert: Tree count", tree.count());
-    if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
-      console.log("Merge: edge is left of v_i");
-      if (
-        (edge.a.y < v_i.point.y && edge.b.y > v_i.point.y) ||
-        (edge.a.y > v_i.point.y && edge.b.y < v_i.point.y)
-      ) {
-        console.log("Merge: v_i is between edge points");
-        e_j = node;
-      }
-    }
-  };
-  const abortFn2 = () => {
-    return Boolean(e_j);
-  };
-  tree.traversePreOrder(searchFn2);
+  const e_j = getEdgeLeftOfVertex(v_i, tree);
+
   if (!e_j) {
-    console.error("Merge Event: Could not find e_j");
-    return;
+    throw Error("Merge Event: Could not find e_j");
   }
   // if (helper( 𝑒_𝑗 ) is a merge vertex) then
   if (e_j.getValue().helper.type === "merge") {
     // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to edge list;
     const helper_e_j = e_j.getValue().helper;
     const diagonal = new Vector(v_i.point, helper_e_j.point);
-    edgeList.insertLast(diagonal);
+    diagonalsList.push(diagonal);
   }
   // helper( 𝑒_𝑗 ):= 𝑣_𝑖;
   e_j.setValue({ ...e_j.getValue(), helper: v_i });
@@ -285,74 +297,47 @@ function handleMergeEvent(
 }
 
 function handleRegularEvent(
-  event: IEvent,
+  event: IVertex,
   tree: BinarySearchTree<ITreeNode>,
-  edgeList: DoublyLinkedList<Vector>
+  edgeList: EdgeList,
+  diagonalsList: Vector[]
 ) {
   const v_i = event;
-  const e_i = edgeList.find((edge) => {
-    return edge.getValue().b.equals(v_i.point);
-  });
-  console.log("regular event", { v_i, e_i });
+  const e_i = edgeList.getEdgeOfVertex(v_i);
+
   // if (the interior of P is right of 𝑣_𝑖) then {
-  if (e_i.getValue().a.x > v_i.point.x) {
-    console.log("Interior is right of v_i");
-    const e_i_minus_1 = e_i.hasPrev() ? e_i.getPrev() : edgeList.tail();
-    let helper_e_i_minus_1: ITreeNode["helper"];
-    const searchFn1 = (node: BinarySearchTreeNode<ITreeNode>) => {
-      if (!node) return;
-      const edge = node.getValue().edge;
-      if (edge.equals(e_i_minus_1.getValue())) {
-        helper_e_i_minus_1 = node.getValue().helper;
-      }
-    };
-    const abortFn1 = () => {
-      return Boolean(helper_e_i_minus_1);
-    };
-    tree.traversePreOrder(searchFn1, abortFn1);
+  if (e_i.getValue().vector.a.y < e_i.getValue().vector.b.y) {
+    const e_i_minus_1 = edgeList.getPrevEdgeOfEdge(e_i);
+    // const e_i_minus_1_node = tree.findKey(e_i_minus_1.getValue().index);
+    const e_i_minus_1_node = findInTree(e_i_minus_1.getValue().index, tree);
+    if (!e_i_minus_1_node) {
+      throw new Error(
+        "Regular vertex: Could not find e_i_minus_1_node in tree"
+      );
+    }
+    const helper_e_i_minus_1 = e_i_minus_1_node.getValue().helper;
 
     // if (helper( 𝑒_𝑖−1 ) is a merge vertex) then {
-    if (helper_e_i_minus_1 && helper_e_i_minus_1.type === "merge") {
+    if (helper_e_i_minus_1.type === "merge") {
       // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑖−1 ) to edge list;
       const diagonal = new Vector(v_i.point, helper_e_i_minus_1.point);
-      edgeList.insertLast(diagonal);
+      diagonalsList.push(diagonal);
     }
     // Remove 𝑒_𝑖−1 from tree;
-    tree.remove({
-      edge: e_i_minus_1.getValue(),
-      helper: helper_e_i_minus_1,
-    });
-    console.log("Removed. Tree count", tree.count());
+    tree.remove(e_i_minus_1_node.getValue());
 
-    //   Add 𝑒_i with helper( 𝑒_𝑖 ):= 𝑣_𝑖 to tree;
+    // Add 𝑒_i with helper( 𝑒_𝑖 ):= 𝑣_𝑖 to tree;
     const helper_e_i = v_i;
     tree.insert({
-      // key: e_i.a.x,
+      key: e_i.getValue().index,
       edge: e_i.getValue(),
       helper: helper_e_i,
     });
-    console.log("Insert: Tree count", tree.count());
   } else {
     // Search in tree for the edge 𝑒_𝑗 left of 𝑣_𝑖 ;
-    let e_j: BinarySearchTreeNode<ITreeNode>;
-    const searchFn2 = (node: BinarySearchTreeNode<ITreeNode>) => {
-      const edge = node.getValue().edge;
-      console.log("Search for ");
-      if (edge.a.x < v_i.point.x && edge.b.x < v_i.point.x) {
-        if (
-          (edge.a.y < v_i.point.y && edge.b.y > v_i.point.y) ||
-          (edge.b.y < v_i.point.y && edge.a.y > v_i.point.y)
-        ) {
-          e_j = node;
-        }
-      }
-    };
-    const abortFn2 = () => {
-      return Boolean(e_j);
-    };
-    tree.traversePreOrder(searchFn2, abortFn2);
+    const e_j = getEdgeLeftOfVertex(v_i, tree);
     if (!e_j) {
-      return;
+      throw Error("Merge Event: Could not find e_j");
     }
 
     // if (helper( 𝑒_𝑗 ) is a merge vertex) then
@@ -360,7 +345,7 @@ function handleRegularEvent(
       // Add diagonal from 𝑣_𝑖 to helper( 𝑒_𝑗 ) to edge list;
       const helper_e_j = e_j.getValue().helper;
       const diagonal = new Vector(v_i.point, helper_e_j.point);
-      edgeList.insertLast(diagonal);
+      diagonalsList.push(diagonal);
     }
     // helper( 𝑒_𝑗 ):= 𝑣_𝑖;
     e_j.setValue({ ...e_j.getValue(), helper: v_i });
@@ -369,11 +354,9 @@ function handleRegularEvent(
   return undefined;
 }
 
-function partitionIntoMonotonePolygons(
-  vertices: Point[],
-  edgeList: DoublyLinkedList<Vector>
-) {
+function partition(vertices: Point[], edgeList: EdgeList) {
   // Create data structures
+  const diagonalsList: Vector[] = [];
   const events = createVertexEvents(edgeList);
   console.log("Events: ");
   console.table(
@@ -401,20 +384,20 @@ function partitionIntoMonotonePolygons(
       handleStartEvent(event, tree, edgeList);
     } else if (event.type === "split") {
       console.log('Processing "split" event: ', event);
-      handleSplitEvent(event, tree, edgeList);
+      handleSplitEvent(event, tree, edgeList, diagonalsList);
     } else if (event.type === "end") {
       console.log('Processing "end" event: ', event);
-      handleEndEvent(event, tree, edgeList);
+      handleEndEvent(event, tree, edgeList, diagonalsList);
     } else if (event.type === "merge") {
       console.log('Processing "merge" event: ', event);
-      handleMergeEvent(event, tree, edgeList);
+      handleMergeEvent(event, tree, edgeList, diagonalsList);
     } else if (event.type === "regular") {
       console.log('Processing "regular" event: ', event);
-      handleRegularEvent(event, tree, edgeList);
+      handleRegularEvent(event, tree, edgeList, diagonalsList);
     }
   }
   console.log("Finished.");
-  return undefined;
+  return diagonalsList;
 }
 
 export function triangulatePolygon(points: Point[]) {
@@ -422,13 +405,14 @@ export function triangulatePolygon(points: Point[]) {
     return undefined;
   }
   const vertices = klona(points);
-  const edgeList = createEdgeList(vertices);
-  const monotonePolygons = partitionIntoMonotonePolygons(vertices, edgeList);
+  const edgeList = new EdgeList(vertices);
+
   console.log("Edge list:");
   console.table(
-    edgeList.toArray().map((edge) => {
-      return { a: edge.a.toString(), b: edge.b.toString() };
+    edgeList.getEdgesArray().map((edge) => {
+      return { a: edge.vector.a.toString(), b: edge.vector.b.toString() };
     })
   );
-  return undefined;
+  const diagonals = partition(vertices, edgeList);
+  return diagonals;
 }
