@@ -22,6 +22,10 @@ class Vector {
     return this.a.equals(vectorB.a) && this.b.equals(vectorB.b);
   }
 
+  invert() {
+    return new Vector(this.b, this.a);
+  }
+
   cross(vectorB: Vector) {
     return this.v_x * vectorB.v_y - vectorB.v_x * this.v_y;
   }

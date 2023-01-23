@@ -22,7 +22,7 @@ class Point {
   }
 
   toString() {
-    return `(${this.x}, y: ${this.y})`;
+    return `(${Math.floor(this.x)}, y: ${Math.floor(this.y)})`;
   }
 }
 

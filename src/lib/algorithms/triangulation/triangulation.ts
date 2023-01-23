@@ -9,6 +9,8 @@ import { Point, Vector } from "../../geometry";
 import { findAngle } from "../../geometry/findAngle";
 import { checkClockwiseTurn, ORIENTATION } from "../../helper";
 import { EdgeList } from "./edgeList/edgeList";
+import { DoublyLinkedList } from "@datastructures-js/linked-list";
+import { IEdgeList } from "./types/triangulationTypes";
 
 type IVertex = {
   point: Point;
@@ -415,6 +417,98 @@ function partition(vertices: Point[], edgeList: EdgeList) {
   return diagonalsList;
 }
 
+type IVertexWithSide = { point: Point; side: "left" | "right" };
+
+function triangulateMonotone(edgeList: IEdgeList) {
+  const diagonals: Vector[] = [];
+  // Sort vertices top to bottom 𝑢_1, … , 𝑢_𝑛;
+  const vertices: IVertexWithSide[] = edgeList
+    .toArray()
+    .map((edge) => {
+      const point = edge.vector.a;
+      const side: IVertexWithSide["side"] =
+        edge.vector.a.y < edge.vector.b.y ? "left" : "right";
+      return { point, side };
+    })
+    .sort((a, b) => a.point.y - b.point.y);
+
+  // Initialize empty stack S; S.push( 𝑢_1 ); S.push( 𝑢_2 );
+  const stack = [];
+  stack.push(vertices[0]);
+  stack.push(vertices[1]);
+
+  console.log(stack.map((item) => item?.point.toString()));
+
+  for (let j = 2; j < vertices.length - 1; j++) {
+    console.log("j", j);
+    const u_j = vertices[j];
+    const s_top = stack[stack.length - 1];
+    // if ( 𝑢_𝑗 and S.top() are on different sides) then {
+    if (u_j.side !== s_top?.side) {
+      // Pop all vertices from S and add their diagonals to 𝑢_𝑗 to D, except for the last one;
+      while (stack.length > 1) {
+        const vertex = stack.pop();
+        if (!vertex) {
+          return;
+        }
+        const diagonal = new Vector(vertex.point, u_j.point);
+        diagonals.push(diagonal);
+      }
+      stack.pop();
+      // S.push( 𝑢_𝑗−1 ); S.push( 𝑢_𝑗 );
+      stack.push(vertices[j - 1]);
+      stack.push(u_j);
+    } else {
+      // Pop one vertex from S;
+      const firstVertex = stack.pop();
+      // Pop the other vertices from S and add their diagonals to 𝑢_𝑗 to D, as long as this diagonal lies inside 𝑃;
+      while (stack.length > 0) {
+        const vertex = stack.pop();
+        if (!vertex) {
+          return;
+        }
+        // Check if diagonal is inside polygon
+        const e_j = edgeList
+          .find((edge) => {
+            return edge.getValue().vector.a === u_j.point;
+          })
+          .getValue().vector;
+        const e_j_minus_1 = edgeList
+          .find((edge) => {
+            return edge.getValue().vector.b === vertex.point;
+          })
+          .getValue()
+          .vector.invert();
+        const angleToPrevEdge = e_j.angle(e_j_minus_1);
+        const diagonal = new Vector(vertex.point, u_j.point);
+        const angleToDiagonal = e_j.angle(diagonal);
+        const isDiagonalInsideOfPolygon = angleToDiagonal > angleToPrevEdge;
+        if (isDiagonalInsideOfPolygon) {
+          diagonals.push(diagonal);
+        }
+      }
+      // Push the last popped vertex back; S.push( 𝑢_𝑗 );
+      stack.push(firstVertex);
+      stack.push(u_j);
+    }
+    console.log(stack.map((item) => item?.point.toString()));
+  }
+
+  // Pop all vertices from S and add their diagonals to 𝑢_𝑛 to D, except for the first and last one;
+  // Remove first item from stack
+  stack.pop();
+  while (stack.length > 1) {
+    const vertex = stack.pop();
+    if (!vertex) {
+      return;
+    }
+    const u_n = vertices[vertices.length - 1];
+    const diagonal = new Vector(vertex.point, u_n.point);
+    diagonals.push(diagonal);
+  }
+  return diagonals;
+}
+
 export function triangulatePolygon(points: Point[]) {
   if (points.length < 3) {
     return undefined;
@@ -428,6 +522,8 @@ export function triangulatePolygon(points: Point[]) {
       return { a: edge.vector.a.toString(), b: edge.vector.b.toString() };
     })
   );
-  const diagonals = partition(vertices, edgeList);
+  // const diagonals = partition(vertices, edgeList);
+  const diagonals = triangulateMonotone(edgeList.getEdges());
+
   return diagonals;
 }

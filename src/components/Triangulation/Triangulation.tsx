@@ -29,6 +29,7 @@ function Triangulation() {
 
   const handleDraw = () => {
     const newDiagonals = triangulatePolygon(points) || [];
+    console.log("diagonals", newDiagonals);
     setDiagonals(newDiagonals);
   };
 
