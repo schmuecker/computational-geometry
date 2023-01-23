@@ -103,10 +103,14 @@ const TreeVisualization = ({
               onHoverPoint();
             }}
           >
-            <div className="ml-6 hidden bg-white group-hover:block">
-              <p>id:{leaf.node.model.id.substr(0, 4)}</p>
-              <p>x:{Number(leaf.node.model.x).toFixed(1)}</p>
-              <p>y:{Number(leaf.node.model.y).toFixed(1)}</p>
+            <div className="absolute z-10 ml-6 hidden whitespace-nowrap rounded-md bg-black/40 px-3 py-2 text-white backdrop-blur-sm group-hover:block">
+              <p>
+                (
+                {`${Number(leaf.node.model.x).toFixed(0)}, ${Number(
+                  leaf.node.model.y
+                ).toFixed(0)}`}
+                )
+              </p>
             </div>
           </div>
         );
