@@ -218,7 +218,7 @@ class TwoDTree {
     if (!this.rootNode) {
       return;
     }
-    rangeSearch(this.rootNode, "ver", queryRange);
+    rangeSearch(this.rootNode, "hor", queryRange);
     return { output, visited };
   }
 }
