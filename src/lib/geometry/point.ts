@@ -15,6 +15,12 @@ class Point {
     return this.x === point.x && this.y === point.y;
   }
 
+  distanceTo(point: Point) {
+    return Math.sqrt(
+      Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2)
+    );
+  }
+
   toString() {
     return `(${this.x}, y: ${this.y})`;
   }

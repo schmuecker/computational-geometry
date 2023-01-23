@@ -124,13 +124,13 @@ function findInTree(key: number, tree: BinarySearchTree<ITreeNode>) {
   return resultNode;
 }
 
-type IFoundNode = BinarySearchTreeNode<ITreeNode> | undefined;
+type IFoundNode = BinarySearchTreeNode<ITreeNode>;
 
 function getEdgeLeftOfVertex(
   vertex: IVertex,
   tree: BinarySearchTree<ITreeNode>
 ): IFoundNode {
-  let e_j: IFoundNode = undefined;
+  const e_j_candidates: IFoundNode[] = [];
   const searchFn = (node: BinarySearchTreeNode<ITreeNode>) => {
     const edge = node.getValue().edge;
     console.log("search for", vertex.point);
@@ -144,18 +144,33 @@ function getEdgeLeftOfVertex(
         edge.vector.a.y < vertex.point.y &&
         edge.vector.b.y > vertex.point.y
       ) {
-        e_j = node;
+        e_j_candidates.push(node);
       }
     }
   };
-  const abortFn = () => {
-    return Boolean(e_j);
-  };
-  tree.traversePreOrder(searchFn, abortFn);
-  if (!e_j) {
+  tree.traversePreOrder(searchFn);
+  if (e_j_candidates.length === 0) {
     throw Error("No edge found left of vertex");
   }
-  return e_j;
+  const e_j_distance = e_j_candidates.map((e_j) => {
+    const vector = e_j?.getValue().edge.vector;
+
+    const deltaY = vector.b.y - vector.a.y;
+    const deltaX = vector.b.x - vector.a.x;
+    const slope = deltaY / deltaX;
+    const yIntercept = vector.a.y - slope * vector.a.x;
+
+    const formula = (y: number) => (y - yIntercept) / slope;
+    const intersection = new Point(formula(vertex.point.y), vertex.point.y);
+    const distance = vertex.point.distanceTo(intersection);
+    return { distance, node: e_j };
+  });
+
+  const closestCandidate = e_j_distance.reduce((prev, current) => {
+    return prev.distance < current.distance ? prev : current;
+  });
+
+  return closestCandidate["node"];
 }
 
 function handleStartEvent(
