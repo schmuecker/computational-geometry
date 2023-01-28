@@ -104,7 +104,7 @@ function connect(point: Point, hull: IHullEdge[], triangulation: ITriangle[]) {
 
   const outputTriangulation = [...inputTriangulation, ...createdTriangles];
 
-  console.log("Connected Triangulation", outputTriangulation);
+  // console.log("Connected Triangulation", outputTriangulation);
   return outputTriangulation;
 }
 
@@ -153,25 +153,15 @@ function pointInCircle(point: Point, p1: Point, p2: Point, p3: Point) {
 }
 
 function checkDelaunyCondition(point: Point, triangle: ITriangle) {
-  return pointInCircle(point, triangle.i, triangle.j, triangle.k);
+  // if the point is not inside the circle of the 3 triangle points the delauny condition is achieved
+  return !pointInCircle(point, triangle.i, triangle.j, triangle.k);
 }
 
+// Does this function really find all violated triangles?
 function findViolatedTriangles(triangle: ITriangle, point: Point) {
-  let violatedTriangles: ITriangle[] = [];
+  const violatedTriangles: ITriangle[] = [];
 
-  if (checkDelaunyCondition(point, triangle)) {
-    return violatedTriangles;
-  }
-
-  violatedTriangles.push(triangle);
-  triangle.checked = true;
-
-  console.log("Start recursion");
-  violatedTriangles = findViolatedNeighboursRecursion(
-    triangle,
-    point,
-    violatedTriangles
-  );
+  findViolatedNeighboursRecursion(triangle, point, violatedTriangles);
 
   return violatedTriangles;
 }
@@ -182,37 +172,41 @@ function findViolatedNeighboursRecursion(
   violatedTriangles: ITriangle[]
 ) {
   if (triangle.checked) {
-    return violatedTriangles;
+    return;
   }
+
+  if (!checkDelaunyCondition(point, triangle)) {
+    violatedTriangles.push(triangle);
+  }
+
+  triangle.checked = true;
+
   // code duplicates ... :)
   if (triangle.neighbours?.i_j) {
-    const neighbour = triangle.neighbours.i_j;
-    neighbour.checked = true;
-    if (!checkDelaunyCondition(point, neighbour)) {
-      violatedTriangles.push(neighbour);
-      findViolatedNeighboursRecursion(neighbour, point, violatedTriangles);
-    }
+    findViolatedNeighboursRecursion(
+      triangle.neighbours.i_j,
+      point,
+      violatedTriangles
+    );
   }
 
   if (triangle.neighbours?.j_k) {
-    const neighbour = triangle.neighbours.j_k;
-    neighbour.checked = true;
-    if (!checkDelaunyCondition(point, neighbour)) {
-      violatedTriangles.push(neighbour);
-      findViolatedNeighboursRecursion(neighbour, point, violatedTriangles);
-    }
+    findViolatedNeighboursRecursion(
+      triangle.neighbours.j_k,
+      point,
+      violatedTriangles
+    );
   }
 
   if (triangle.neighbours?.k_i) {
-    const neighbour = triangle.neighbours.k_i;
-    neighbour.checked = true;
-    if (!checkDelaunyCondition(point, neighbour)) {
-      violatedTriangles.push(neighbour);
-      findViolatedNeighboursRecursion(neighbour, point, violatedTriangles);
-    }
+    findViolatedNeighboursRecursion(
+      triangle.neighbours.k_i,
+      point,
+      violatedTriangles
+    );
   }
 
-  return violatedTriangles;
+  return;
 }
 
 function removeTriangles(
@@ -232,7 +226,7 @@ function getHullOfHole(violatedTriangles: ITriangle[]) {
   const innerHull: IHullEdge[] = [];
 
   violatedTriangles.forEach((triangle) => {
-    // check all nieghboursof the violated triangles
+    // check all neighbours of the violated triangles
     // if a neighbour is not violated it lies on the border of the hole
     // then add the edge with the neighbour triangle to the innerHull
     // when the edge has no neighbour it is the edge of the outer convex hull
@@ -307,10 +301,10 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
   // Compute init Triangulation D
   let triangulation = connect(shuffledInnerPoints[0], convexHull, []);
 
-  console.log("Shuffle Inner Points", shuffledInnerPoints);
+  // console.log("Shuffle Inner Points", shuffledInnerPoints);
 
   for (let index = 1; index < shuffledInnerPoints.length; index++) {
-    console.log("In Loop Iteration #", index);
+    // console.log("In Loop Iteration #", index);
     const point_r = shuffledInnerPoints[index];
 
     // find the triangle containing p_r
@@ -321,7 +315,7 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
     const containingTriangle =
       containingTriangleList[containingTriangleList.length - 1];
 
-    console.log("Containing Triangle:", containingTriangle);
+    // console.log("Containing Triangle:", containingTriangle);
 
     // find all triangles which delauny is violated
     const violatedTriangles = findViolatedTriangles(
@@ -342,11 +336,11 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
     if (hole.length === 0) {
       hole = [containingTriangle];
     }
-    console.log("Hole", hole);
+    // console.log("Hole", hole);
 
     const innerHull = getHullOfHole(hole);
 
-    console.log("Inner Hull", innerHull);
+    // console.log("Inner Hull", innerHull);
 
     const newTriangulation = connect(point_r, innerHull, cleanedTriangulation);
 
@@ -354,12 +348,12 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       triangle.checked = false;
     });
 
-    console.log(
-      "Triangulation after Iteration #",
-      index,
-      " = ",
-      newTriangulation
-    );
+    // console.log(
+    //   "Triangulation after Iteration #",
+    //   index,
+    //   " = ",
+    //   newTriangulation
+    // );
     triangulation = [...newTriangulation];
 
     // find all triangles which delauny is violated ?
@@ -400,7 +394,7 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
     // if yes remove the triangle and add the new corner to the hole
   }
 
-  console.log("Final Triangulation", triangulation);
+  // console.log("Final Triangulation", triangulation);
 
   return triangulation;
 }
