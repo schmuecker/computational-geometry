@@ -1,8 +1,7 @@
-import { Transition } from "@headlessui/react";
 import { Point, Vector } from "../../geometry";
 import { grahamScan } from "../convex-hull/grahamScan";
 
-interface ITriangle {
+export interface ITriangle {
   i: Point;
   j: Point;
   k: Point;
@@ -11,6 +10,13 @@ interface ITriangle {
     j_k?: ITriangle;
     k_i?: ITriangle;
   };
+  checked: boolean;
+  removed: boolean;
+}
+
+interface IHullEdge {
+  edge: Vector;
+  neighbour?: ITriangle;
 }
 
 // shuffle the point array
@@ -26,35 +32,74 @@ function shuffle(array: Point[]) {
 }
 
 // connect the corners of the Hull to the points
-function connect(point: Point, hull: Vector[], triangulation: ITriangle[]) {
+function connect(point: Point, hull: IHullEdge[], triangulation: ITriangle[]) {
   let firstTriangle: ITriangle | null = null;
   let prevTriangle: ITriangle | null = null;
 
   for (let index = 0; index < hull.length; index++) {
-    const edge = hull[index];
+    const hullEdge = hull[index];
 
     // here you use the hull, because of the hull you know the triangles that are around the hull
     // these you can easy use to add the neighbours to the new triangle!
     // triangle forms a linked list
-    const triangle: ITriangle = { i: point, j: edge.a, k: edge.b };
+    const triangle: ITriangle = {
+      i: point,
+      j: hullEdge.edge.a,
+      k: hullEdge.edge.b,
+      checked: false,
+      removed: false,
+    };
 
     if (index === 0) {
       firstTriangle = triangle;
     }
 
+    // prev triangle and this triangle are neighbours
     if (prevTriangle) {
       triangle.neighbours = { ...triangle.neighbours, i_j: prevTriangle };
+      prevTriangle.neighbours = { ...prevTriangle.neighbours, k_i: triangle };
     }
 
+    // last and first triangle are neighbours (because its a circle)
     if (index === hull.length - 1 && firstTriangle) {
       triangle.neighbours = { ...triangle.neighbours, k_i: firstTriangle };
+      firstTriangle.neighbours = { ...firstTriangle.neighbours, i_j: triangle };
     }
 
-    prevTriangle = triangle;
+    // the triangle on the hull edge is also a neighbour
+    // the hullEdge has to know which edge it is from the outer triangle
+    if (hullEdge.neighbour) {
+      triangle.neighbours = { ...triangle.neighbours, j_k: hullEdge.neighbour };
+
+      if (hullEdge.neighbour.neighbours?.i_j) {
+        if (hullEdge.neighbour.neighbours.i_j.removed) {
+          hullEdge.neighbour.neighbours.i_j = triangle;
+        }
+      }
+      if (hullEdge.neighbour.neighbours?.j_k) {
+        if (hullEdge.neighbour.neighbours.j_k.removed) {
+          hullEdge.neighbour.neighbours.j_k = triangle;
+        }
+      }
+      if (hullEdge.neighbour.neighbours?.k_i) {
+        if (hullEdge.neighbour.neighbours.k_i.removed) {
+          hullEdge.neighbour.neighbours.k_i = triangle;
+        }
+      }
+    }
 
     triangulation.push(triangle);
+    prevTriangle = triangle;
   }
 
+  if (firstTriangle && prevTriangle) {
+    firstTriangle.neighbours = {
+      ...firstTriangle.neighbours,
+      i_j: prevTriangle,
+    };
+  }
+
+  console.log("Triangulation", triangulation);
   return triangulation;
 }
 
@@ -106,9 +151,17 @@ function checkDelaunyCondition(point: Point, triangle: ITriangle) {
   return pointInCircle(point, triangle.i, triangle.j, triangle.k);
 }
 
-function findViolatedNeighbours(triangle: ITriangle, point: Point) {
+function findViolatedTriangles(triangle: ITriangle, point: Point) {
   let violatedTriangles: ITriangle[] = [];
 
+  if (checkDelaunyCondition(point, triangle)) {
+    return violatedTriangles;
+  }
+
+  violatedTriangles.push(triangle);
+  triangle.checked = true;
+
+  console.log("Start recursion");
   violatedTriangles = findViolatedNeighboursRecursion(
     triangle,
     point,
@@ -123,9 +176,13 @@ function findViolatedNeighboursRecursion(
   point: Point,
   violatedTriangles: ITriangle[]
 ) {
+  if (triangle.checked) {
+    return violatedTriangles;
+  }
   // code duplicates ... :)
   if (triangle.neighbours?.i_j) {
     const neighbour = triangle.neighbours.i_j;
+    neighbour.checked = true;
     if (!checkDelaunyCondition(point, neighbour)) {
       violatedTriangles.push(neighbour);
       findViolatedNeighboursRecursion(neighbour, point, violatedTriangles);
@@ -134,6 +191,7 @@ function findViolatedNeighboursRecursion(
 
   if (triangle.neighbours?.j_k) {
     const neighbour = triangle.neighbours.j_k;
+    neighbour.checked = true;
     if (!checkDelaunyCondition(point, neighbour)) {
       violatedTriangles.push(neighbour);
       findViolatedNeighboursRecursion(neighbour, point, violatedTriangles);
@@ -142,6 +200,7 @@ function findViolatedNeighboursRecursion(
 
   if (triangle.neighbours?.k_i) {
     const neighbour = triangle.neighbours.k_i;
+    neighbour.checked = true;
     if (!checkDelaunyCondition(point, neighbour)) {
       violatedTriangles.push(neighbour);
       findViolatedNeighboursRecursion(neighbour, point, violatedTriangles);
@@ -151,16 +210,80 @@ function findViolatedNeighboursRecursion(
   return violatedTriangles;
 }
 
-function delaunyTriangulation(points: Point[]): Vector[] {
+function removeTriangles(
+  triangulation: ITriangle[],
+  trianglesToRemove: ITriangle[]
+) {
+  return triangulation.filter((triangle) => {
+    if (trianglesToRemove.includes(triangle)) {
+      triangle.removed = true;
+      return false;
+    }
+    return true;
+  });
+}
+
+function getHull(violatedTriangles: ITriangle[]) {
+  const innerHull: IHullEdge[] = [];
+
+  violatedTriangles.forEach((triangle) => {
+    // check all nieghboursof the violated triangles
+    // if a neighbour is not violated it lies on the border of the hole
+    // then add the edge with the neighbour triangle to the innerHull
+    // when the edge has no neighbour it is the edge of the outer convex hull
+    // then add the edge without a neighbour triangle
+    if (triangle.neighbours?.i_j) {
+      const neighbour = triangle.neighbours.i_j;
+      if (!violatedTriangles.includes(neighbour)) {
+        const edge = new Vector(triangle.i, triangle.j);
+        innerHull.push({ edge, neighbour });
+      }
+    } else {
+      const edge = new Vector(triangle.i, triangle.j);
+      innerHull.push({ edge });
+    }
+
+    if (triangle.neighbours?.j_k) {
+      const neighbour = triangle.neighbours.j_k;
+      if (!violatedTriangles.includes(neighbour)) {
+        const edge = new Vector(triangle.i, triangle.j);
+        innerHull.push({ edge, neighbour });
+      }
+    } else {
+      const edge = new Vector(triangle.i, triangle.j);
+      innerHull.push({ edge });
+    }
+
+    if (triangle.neighbours?.k_i) {
+      const neighbour = triangle.neighbours.k_i;
+      if (!violatedTriangles.includes(neighbour)) {
+        const edge = new Vector(triangle.i, triangle.j);
+        innerHull.push({ edge, neighbour });
+      }
+    } else {
+      const edge = new Vector(triangle.i, triangle.j);
+      innerHull.push({ edge });
+    }
+  });
+
+  return innerHull;
+}
+
+function delaunyTriangulation(points: Point[]): ITriangle[] {
   if (points.length < 3) {
     return [];
   }
   // compute the convex Hull of P
-  const convexHull = grahamScan(points);
+  const convexHullVectors = grahamScan(points);
+  const convexHull: IHullEdge[] = [];
+
+  convexHullVectors.forEach((edgeVector) => {
+    convexHull.push({ edge: edgeVector });
+  });
 
   // Get the points that lie on the Convex Hull
-  const hullPoints = convexHull.map((vector) => {
-    return vector.a;
+  const hullPoints = convexHull.map((hullEdge) => {
+    return hullEdge.edge.a;
   });
 
   // compute the set of inner Points
@@ -168,8 +291,9 @@ function delaunyTriangulation(points: Point[]): Vector[] {
     if (!hullPoints.includes(point)) return point;
   });
 
+  // this algo needs inner points (we could add one random point in this case)
   if (innerPoints.length === 0) {
-    return convexHull;
+    return [];
   }
 
   // shuffle the Inner points
@@ -180,6 +304,7 @@ function delaunyTriangulation(points: Point[]): Vector[] {
   triangulation = connect(shuffledInnerPoints[0], convexHull, triangulation);
 
   for (let index = 1; index < shuffledInnerPoints.length; index++) {
+    console.log("In Loop Iteration #", index);
     const point_r = shuffledInnerPoints[index];
 
     // find the triangle containing p_r
@@ -187,13 +312,27 @@ function delaunyTriangulation(points: Point[]): Vector[] {
       if (pointInTriangle(point_r, triangle)) return triangle;
     });
 
-    // find all triangles which delauny is violated
+    console.log("Containing Triangle:", containingTriangle);
 
-    const violatedTriangles = findViolatedNeighbours(
+    // find all triangles which delauny is violated
+    const violatedTriangles = findViolatedTriangles(
       containingTriangle[0],
       point_r
     );
 
+    console.log("Violated Triangles", violatedTriangles);
+
+    triangulation = removeTriangles(triangulation, violatedTriangles);
+
+    const innerHull = getHull(violatedTriangles);
+
+    console.log("Inner Hull", innerHull);
+
+    triangulation = connect(point_r, innerHull, triangulation);
+
+    triangulation.forEach((triangle) => {
+      triangle.checked = false;
+    });
     // find all triangles which delauny is violated ?
     // >>> this approach does not use the adjacency of the triangles <<<
     // and it doesnt even work
@@ -230,12 +369,11 @@ function delaunyTriangulation(points: Point[]): Vector[] {
     // we have the 3 Points of the containing Triangle
     // search for the neighbour triangles and check if the delauny condition is violated.
     // if yes remove the triangle and add the new corner to the hole
-    triangulation = [...triangulation];
-
-    console.log("Containing Triangle", containingTriangle);
   }
 
-  return triangulation.flat();
+  console.log("Final Triangulation", triangulation);
+
+  return triangulation;
 }
 
 export { delaunyTriangulation };

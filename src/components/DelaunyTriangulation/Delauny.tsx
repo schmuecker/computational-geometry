@@ -1,14 +1,24 @@
 import { useState } from "react";
 
-import { Point } from "../../lib/geometry";
+import { Point, Vector } from "../../lib/geometry";
 import { ResetButton } from "../Button/ResetButton";
 import DelaunyCanvas from "./DelaunyCanvas/DelaunyCanvas";
-import { delaunyTriangulation } from "../../lib/algorithms/delauny-triangulation/delauny-triangulation";
+import {
+  delaunyTriangulation,
+  ITriangle,
+} from "../../lib/algorithms/delauny-triangulation/delauny-triangulation";
 
 function Delauny() {
   const [points, setPoints] = useState<Point[]>([]);
 
-  const vectors = delaunyTriangulation(points);
+  const triangles: ITriangle[] = delaunyTriangulation(points);
+
+  const vectors: Vector[] = [];
+  triangles.forEach((triangle) => {
+    vectors.push(new Vector(triangle.i, triangle.j));
+    vectors.push(new Vector(triangle.j, triangle.k));
+    vectors.push(new Vector(triangle.k, triangle.i));
+  });
 
   const handleAddPoint = (newPoint: Point) => {
     const fitleredPoints = points.filter((point) => {
