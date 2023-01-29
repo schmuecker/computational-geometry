@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { Stage, Layer, Circle, Line } from "react-konva";
+import { Text, Stage, Layer, Circle, Line } from "react-konva";
 
 import { Point, Vector } from "../../../lib/geometry";
 
@@ -11,14 +11,22 @@ interface CanvasPointProps {
 function CanvasPoint({ point, onDelete }: CanvasPointProps) {
   const { x, y } = point;
   return (
-    <Circle
-      width={16}
-      height={16}
-      x={x}
-      y={y}
-      fill="white"
-      onContextMenu={() => onDelete(point.id)}
-    />
+    <>
+      <Circle
+        width={16}
+        height={16}
+        x={x}
+        y={y}
+        fill="white"
+        onContextMenu={() => onDelete(point.id)}
+      />
+      <Text
+        text={`${Math.floor(x)}, ${Math.floor(y)}`}
+        fill="white"
+        x={x - 25}
+        y={y - 25}
+      />
+    </>
   );
 }
 
