@@ -40,7 +40,7 @@ interface CanvasProps {
   onAddPoint: (point: Point) => void;
 }
 
-function TriangulationCanvas({
+function MonotoneTriangulationCanvas({
   points,
   vectors,
   diagonals,
@@ -92,4 +92,4 @@ function TriangulationCanvas({
   );
 }
 
-export default TriangulationCanvas;
+export default MonotoneTriangulationCanvas;

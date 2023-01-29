@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { triangulatePolygon } from "../../lib/algorithms/triangulation/triangulation";
 
 import { Point, Vector } from "../../lib/geometry";
 import { ResetButton } from "../Button/ResetButton";
 import { IconButton } from "../Button/IconButton";
-import TriangulationCanvas from "./TriangulationCanvas/TriangulationCanvas";
+import TriangulationCanvas from "./MonotoneTriangulationCanvas/MonotoneTriangulationCanvas";
 import { PlayIcon } from "@heroicons/react/24/outline";
 
-function Triangulation() {
+function MonotoneTriangulation() {
   const [points, setPoints] = useState<Point[]>([]);
   const [diagonals, setDiagonals] = useState<Vector[]>([]);
 
@@ -56,4 +56,4 @@ function Triangulation() {
   );
 }
 
-export default Triangulation;
+export default MonotoneTriangulation;

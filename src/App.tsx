@@ -43,10 +43,10 @@ function App() {
       current: pathname === "/2d-trees",
     },
     {
-      name: "Triangulation",
-      href: "/triangulation",
+      name: "Monotone Triangulation",
+      href: "/monotone-triangulation",
       icon: MapIcon,
-      current: pathname === "/triangulation",
+      current: pathname === "/monotone-triangulation",
     },
   ];
 
