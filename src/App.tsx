@@ -40,6 +40,12 @@ function App() {
       icon: QrCodeIcon,
       current: pathname === "/2d-trees",
     },
+    {
+      name: "Delauny Triangulation ",
+      href: "/delauny",
+      icon: QrCodeIcon,
+      current: pathname === "/delauny",
+    },
   ];
 
   return <RootLayout links={links} />;

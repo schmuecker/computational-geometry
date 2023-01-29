@@ -21,6 +21,23 @@ class Vector {
   cross(vectorB: Vector) {
     return this.v_x * vectorB.v_y - vectorB.v_x * this.v_y;
   }
+
+  dot(vectorB: Vector) {
+    return this.v_x * vectorB.v_x + this.v_y * vectorB.v_y;
+  }
+
+  equals(vectorB: Vector) {
+    return (
+      (this.a.x === vectorB.a.x &&
+        this.a.y === vectorB.a.y &&
+        this.b.x === vectorB.b.x &&
+        this.b.y === vectorB.b.y) ||
+      (this.a.x === vectorB.b.x &&
+        this.a.y === vectorB.b.y &&
+        this.b.x === vectorB.a.x &&
+        this.b.y === vectorB.a.y)
+    );
+  }
 }
 
 export { Vector };

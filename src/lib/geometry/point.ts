@@ -10,6 +10,10 @@ class Point {
     this.x = x;
     this.y = y;
   }
+
+  equals(pointB: Point) {
+    return this.x === pointB.x && this.y === pointB.y;
+  }
 }
 
 export { Point };
