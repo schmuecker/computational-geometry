@@ -1,4 +1,3 @@
-import { klona } from "klona";
 import { nanoid } from "nanoid";
 import { Point, Vector } from "../../geometry";
 import { grahamScan } from "../convex-hull/grahamScan";
@@ -129,7 +128,6 @@ function connect(
 
   const outputTriangulation = [...inputTriangulation, ...createdTriangles];
 
-  // console.log("Connected Triangulation", outputTriangulation);
   return outputTriangulation;
 }
 
@@ -280,7 +278,6 @@ function getHullOfHole(
   edgeNeighbors: IEdgeNeighbors
 ) {
   const innerHull: IHullEdge[] = [];
-  console.warn("Violated Triangles", violatedTriangles);
   violatedTriangles.forEach((triangle) => {
     if (!triangle) {
       return;
@@ -294,18 +291,8 @@ function getHullOfHole(
     if (neighbors?.i_j) {
       const neighbour = neighbors.i_j;
       if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
-        // if (neighbour.removed) {
-        //   console.log("Wrong Inner Hull Triangle", neighbour);
-        //   throw new Error("A removed Tringle has been added to the innerHull");
-        // }
         if (!neighbour.removed) {
           const edge = new Vector(triangle.i, triangle.j);
-          console.warn({ triangleNeighbors, edgeNeighbors });
-          console.warn("i_j: Add edge to inner hull", {
-            edge,
-            triangle,
-            neighbour,
-          });
           innerHull.push({ edge });
           edgeNeighbors[edge.id] = neighbour;
         }
@@ -318,17 +305,8 @@ function getHullOfHole(
     if (neighbors?.j_k) {
       const neighbour = neighbors.j_k;
       if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
-        // if (neighbour.removed) {
-        //   console.log("Wrong Inner Hull Triangle", neighbour);
-        //   throw new Error("A removed Tringle has been added to the innerHull");
-        // }
         if (!neighbour.removed) {
           const edge = new Vector(triangle.j, triangle.k);
-          console.warn("j_k: Add edge to inner hull", {
-            edge,
-            triangle,
-            neighbour,
-          });
           innerHull.push({ edge });
           edgeNeighbors[edge.id] = neighbour;
         }
@@ -341,17 +319,8 @@ function getHullOfHole(
     if (neighbors?.k_i) {
       const neighbour = neighbors.k_i;
       if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
-        // if (neighbour.removed) {
-        //   console.log("Wrong Inner Hull Triangle", neighbour);
-        //   throw new Error("A removed Tringle has been added to the innerHull");
-        // }
         if (!neighbour.removed) {
           const edge = new Vector(triangle.k, triangle.i);
-          console.warn("k_i: Add edge to inner hull", {
-            edge,
-            triangle,
-            neighbour,
-          });
           innerHull.push({ edge });
           edgeNeighbors[edge.id] = neighbour;
         }
@@ -379,7 +348,6 @@ function getHullOfHole(
       innerHull.splice(innerHull.indexOf(nextEdge), 1);
       currentEdge = nextEdge;
     } else {
-      console.warn("No next edge found", { innerHull, sortedInnerHull });
       break;
     }
   }
@@ -432,12 +400,8 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
     edgeNeighbors
   );
 
-  console.log("Initial Triangulation", triangulation);
-
   for (let index = 1; index < shuffledInnerPoints.length; index++) {
-    console.log("In Loop Iteration #", index);
     const point_r = shuffledInnerPoints[index];
-    console.log("Point R", point_r);
 
     // find the triangle containing p_r
     const containingTriangleList = triangulation.filter((triangle) => {
@@ -446,17 +410,6 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       }
     });
 
-    if (containingTriangleList.length > 1) {
-      console.error("Containing Triangle List", {
-        triangulation,
-        point_r,
-        containingTriangleList,
-      });
-      // throw new Error(
-      //   " Containing Triangle List should have exactly 1 Triangle"
-      // );
-    }
-    console.log({ containingTriangleList });
     const containingTriangle = containingTriangleList[0];
 
     // find all triangles which delauny is violated
@@ -466,22 +419,18 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       triangleNeighbors
     );
 
-    console.log("Triangulation before removal:", triangulation);
     const cleanedTriangulation = removeTriangles(
       triangulation,
       violatedTriangles
     );
-    console.log("Triangulation after removal:", cleanedTriangulation);
 
     let hole = [...violatedTriangles];
     if (hole.length === 0) {
-      console.warn("No violated Triangles found ...?");
       hole = [containingTriangle];
     }
 
     const innerHull = getHullOfHole(hole, triangleNeighbors, edgeNeighbors);
 
-    console.warn("Inner Hull", innerHull);
     const newTriangulation = connect(
       point_r,
       innerHull,
@@ -494,53 +443,8 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       triangle.checked = false;
     });
 
-    // console.log(
-    //   "Triangulation after Iteration #",
-    //   index,
-    //   " = ",
-    //   newTriangulation
-    // );
     triangulation = [...newTriangulation];
-
-    // find all triangles which delauny is violated ?
-    // >>> this approach does not use the adjacency of the triangles <<<
-    // and it doesnt even work
-
-    // const valid: Vector[][] = [];
-    // const violated: Vector[][] = [];
-
-    // triangulation.forEach((triangle) => {
-    //   const point_a = triangle[0].a;
-    //   const point_b = triangle[1].a;
-    //   const point_c = triangle[2].a;
-
-    //   if (pointInCircle(point_r, point_a, point_b, point_c)) {
-    //     violated.push(triangle);
-    //   } else {
-    //     valid.push(triangle);
-    //   }
-    // });
-
-    // const holePoints: Point[] = [];
-    // violated.forEach((triangle) => {
-    //   holePoints.push(triangle[0].a);
-    //   holePoints.push(triangle[1].a);
-    //   holePoints.push(triangle[2].a);
-    // });
-
-    // const innerHull = grahamScan([...new Set(holePoints)]);
-
-    // const innerTriangulation =  connect(point_r, innerHull);
-
-    // triangles in violated are the ones that are violated
-    // the temaining triangulation with the hole is in valid
-
-    // we have the 3 Points of the containing Triangle
-    // search for the neighbour triangles and check if the delauny condition is violated.
-    // if yes remove the triangle and add the new corner to the hole
   }
-
-  // console.log("Final Triangulation", triangulation);
 
   return triangulation;
 }
