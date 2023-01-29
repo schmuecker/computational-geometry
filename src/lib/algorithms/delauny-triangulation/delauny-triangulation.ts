@@ -434,7 +434,29 @@ function getHullOfHole(
     }
   });
 
-  return innerHull;
+  /* Sort the edges of the inner hull */
+  const sortedInnerHull: IHullEdge[] = [];
+  let currentEdge = innerHull[0];
+  sortedInnerHull.push(currentEdge);
+  innerHull.splice(0, 1);
+  while (innerHull.length > 0) {
+    const nextEdge = innerHull.find((edge) => {
+      return (
+        edge.edge.a.equals(currentEdge.edge.b) ||
+        edge.edge.b.equals(currentEdge.edge.b)
+      );
+    });
+    if (nextEdge) {
+      sortedInnerHull.push(nextEdge);
+      innerHull.splice(innerHull.indexOf(nextEdge), 1);
+      currentEdge = nextEdge;
+    } else {
+      console.warn("No next edge found", { innerHull, sortedInnerHull });
+      break;
+    }
+  }
+
+  return sortedInnerHull;
 }
 
 function delaunyTriangulation(points: Point[]): ITriangle[] {
@@ -496,7 +518,7 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       }
     });
 
-    if (containingTriangleList.length !== 1) {
+    if (containingTriangleList.length > 1) {
       console.error("Containing Triangle List", {
         triangulation,
         point_r,
