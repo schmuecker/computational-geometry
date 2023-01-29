@@ -56,6 +56,7 @@ function connect(
 
   for (let index = 0; index < hull.length; index++) {
     const hullEdge = hull[index];
+    console.log({ hull });
     // here you use the hull, because of the hull you know the triangles that are around the hull
     // these you can easy use to add the neighbours to the new triangle!
     // triangle forms a linked list
@@ -70,8 +71,33 @@ function connect(
 
     // prev triangle and this triangle are neighbours
     if (index > 0) {
-      const prevTriangle = createdTriangles[createdTriangles.length - 1];
-
+      const prevTriangle = createdTriangles[index - 1];
+      const isIInNeighbor =
+        triangle.i.id === prevTriangle.i.id ||
+        triangle.i.id === prevTriangle.j.id ||
+        triangle.i.id === prevTriangle.k.id;
+      const isJInNeighbor =
+        triangle.j.id === prevTriangle.i.id ||
+        triangle.j.id === prevTriangle.j.id ||
+        triangle.j.id === prevTriangle.k.id;
+      const isKInNeighbor =
+        triangle.k.id === prevTriangle.i.id ||
+        triangle.k.id === prevTriangle.j.id ||
+        triangle.k.id === prevTriangle.k.id;
+      if (
+        (isIInNeighbor && !isJInNeighbor && !isKInNeighbor) ||
+        (!isIInNeighbor && isJInNeighbor && !isKInNeighbor) ||
+        (!isIInNeighbor && !isJInNeighbor && isKInNeighbor) ||
+        (!isIInNeighbor && !isJInNeighbor && !isKInNeighbor)
+      ) {
+        console.error("Triangle is not connected neighbor", {
+          triangle,
+          prevTriangle,
+          index,
+          createdTriangles,
+        });
+        // throw new Error("Triangle is not connected neighbor");
+      }
       triangleNeighbors[triangle.id] = {
         ...triangleNeighbors[triangle.id],
         i_j: prevTriangle,
@@ -85,6 +111,32 @@ function connect(
     // last and first triangle are neighbours (because its a circle)
     if (index === hull.length - 1) {
       const firstTriangle = createdTriangles[0];
+      const isIInNeighbor =
+        triangle.i.id === firstTriangle.i.id ||
+        triangle.i.id === firstTriangle.j.id ||
+        triangle.i.id === firstTriangle.k.id;
+      const isJInNeighbor =
+        triangle.j.id === firstTriangle.i.id ||
+        triangle.j.id === firstTriangle.j.id ||
+        triangle.j.id === firstTriangle.k.id;
+      const isKInNeighbor =
+        triangle.k.id === firstTriangle.i.id ||
+        triangle.k.id === firstTriangle.j.id ||
+        triangle.k.id === firstTriangle.k.id;
+      if (
+        (isIInNeighbor && !isJInNeighbor && !isKInNeighbor) ||
+        (!isIInNeighbor && isJInNeighbor && !isKInNeighbor) ||
+        (!isIInNeighbor && !isJInNeighbor && isKInNeighbor) ||
+        (!isIInNeighbor && !isJInNeighbor && !isKInNeighbor)
+      ) {
+        console.error("Triangle is not connected neighbor", {
+          triangle,
+          firstTriangle,
+          index,
+          createdTriangles,
+        });
+        // throw new Error("Triangle is not connected neighbor");
+      }
       triangleNeighbors[triangle.id] = {
         ...triangleNeighbors[triangle.id],
         k_i: firstTriangle,
@@ -99,6 +151,32 @@ function connect(
     // the hullEdge has to know which edge it is from the outer triangle
     const hullEdgeNeighbor = edgeNeighbors[hullEdge.edge.id];
     if (hullEdgeNeighbor) {
+      const isIInNeighbor =
+        triangle.i.id === hullEdgeNeighbor.i.id ||
+        triangle.i.id === hullEdgeNeighbor.j.id ||
+        triangle.i.id === hullEdgeNeighbor.k.id;
+      const isJInNeighbor =
+        triangle.j.id === hullEdgeNeighbor.i.id ||
+        triangle.j.id === hullEdgeNeighbor.j.id ||
+        triangle.j.id === hullEdgeNeighbor.k.id;
+      const isKInNeighbor =
+        triangle.k.id === hullEdgeNeighbor.i.id ||
+        triangle.k.id === hullEdgeNeighbor.j.id ||
+        triangle.k.id === hullEdgeNeighbor.k.id;
+      if (
+        (isIInNeighbor && !isJInNeighbor && !isKInNeighbor) ||
+        (!isIInNeighbor && isJInNeighbor && !isKInNeighbor) ||
+        (!isIInNeighbor && !isJInNeighbor && isKInNeighbor) ||
+        (!isIInNeighbor && !isJInNeighbor && !isKInNeighbor)
+      ) {
+        console.error("Triangle is not connected neighbor", {
+          triangle,
+          hullEdgeNeighbor,
+          index,
+          createdTriangles,
+        });
+        // throw new Error("Triangle is not connected neighbor");
+      }
       triangleNeighbors[triangle.id] = {
         ...triangleNeighbors[triangle.id],
         j_k: hullEdgeNeighbor,
@@ -294,6 +372,7 @@ function getHullOfHole(
         // }
         if (!neighbour.removed) {
           const edge = new Vector(triangle.i, triangle.j);
+          console.warn({ triangleNeighbors, edgeNeighbors });
           console.warn("i_j: Add edge to inner hull", {
             edge,
             triangle,
@@ -333,11 +412,6 @@ function getHullOfHole(
 
     if (neighbors?.k_i) {
       const neighbour = neighbors.k_i;
-      console.log("Neighbour KI:", {
-        violatedTriangles,
-        neighbour,
-        isViolated: violatedTriangles.find((t) => t.id === triangle.id),
-      });
       if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
         // if (neighbour.removed) {
         //   console.log("Wrong Inner Hull Triangle", neighbour);
@@ -384,7 +458,10 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
 
   // compute the set of inner Points
   const innerPoints = points.filter((point) => {
-    if (!hullPoints.find((p) => p.id === point.id)) return point;
+    const isInHull = Boolean(hullPoints.find((p) => p.id === point.id));
+    if (!isInHull) {
+      return point;
+    }
   });
 
   // this algo needs inner points (we could add one random point in this case)
@@ -431,7 +508,6 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
     }
 
     const containingTriangle = containingTriangleList[0];
-    console.log("Containing Triangle:", containingTriangle);
 
     // find all triangles which delauny is violated
     const violatedTriangles = findViolatedTriangles(
@@ -439,8 +515,6 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       point_r,
       triangleNeighbors
     );
-
-    console.log("Violated Triangles", violatedTriangles);
 
     console.log("Triangulation before removal:", triangulation);
     const cleanedTriangulation = removeTriangles(
@@ -454,11 +528,9 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
       console.warn("No violated Triangles found ...?");
       hole = [containingTriangle];
     }
-    console.warn("Hole", hole);
 
     const innerHull = getHullOfHole(hole, triangleNeighbors, edgeNeighbors);
 
-    // console.log("Inner Hull", innerHull);
     console.warn("Inner Hull", innerHull);
     const newTriangulation = connect(
       point_r,
