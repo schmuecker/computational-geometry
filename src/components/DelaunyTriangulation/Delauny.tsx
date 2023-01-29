@@ -13,14 +13,22 @@ function Delauny() {
   const [vectors, setVectors] = useState<Vector[]>([]);
 
   useEffect(() => {
-    const triangles: ITriangle[] = delaunyTriangulation(points);
-    const vectors: Vector[] = [];
-    triangles.forEach((triangle) => {
-      vectors.push(new Vector(triangle.i, triangle.j));
-      vectors.push(new Vector(triangle.j, triangle.k));
-      vectors.push(new Vector(triangle.k, triangle.i));
-    });
-    setVectors(vectors);
+    function triangulate() {
+      try {
+        const triangles: ITriangle[] = delaunyTriangulation(points);
+        const vectors: Vector[] = [];
+        triangles.forEach((triangle) => {
+          vectors.push(new Vector(triangle.i, triangle.j));
+          vectors.push(new Vector(triangle.j, triangle.k));
+          vectors.push(new Vector(triangle.k, triangle.i));
+        });
+        setVectors(vectors);
+      } catch (error) {
+        console.error(error);
+        triangulate();
+      }
+    }
+    triangulate();
   }, [points]);
 
   const handleAddPoint = (newPoint: Point) => {
