@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import ConvexHull from "./components/ConvexHull/ConvexHull";
+import Delaunay from "./components/DelaunayTriangulation/Delaunay";
 import Newton from "./components/Newton/Newton";
 import SweepingLines from "./components/SweepLine/SweepLine";
 import MonotoneTriangulation from "./components/MonotoneTriangulation/MonotoneTriangulation";
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: "/monotone-triangulation",
         element: <MonotoneTriangulation />,
+      },
+      {
+        path: "/delaunay",
+        element: <Delaunay />,
       },
     ],
   },

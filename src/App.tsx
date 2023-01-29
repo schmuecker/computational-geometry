@@ -5,6 +5,7 @@ import {
   QrCodeIcon,
   ChartPieIcon,
   MapIcon,
+  GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import { useLocation } from "react-router-dom";
 import useRedirect from "./hooks/useRedirect";
@@ -47,6 +48,12 @@ function App() {
       href: "/monotone-triangulation",
       icon: MapIcon,
       current: pathname === "/monotone-triangulation",
+    },
+    {
+      name: "Delaunay Triangulation ",
+      href: "/delaunay",
+      icon: GlobeAltIcon,
+      current: pathname === "/delaunay",
     },
   ];
 
