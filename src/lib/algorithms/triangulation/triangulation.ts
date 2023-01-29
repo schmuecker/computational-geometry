@@ -9,7 +9,6 @@ import { Point, Vector } from "../../geometry";
 import { findAngle } from "../../geometry/findAngle";
 import { checkClockwiseTurn, ORIENTATION } from "../../helper";
 import { EdgeList } from "./edgeList/edgeList";
-import { DoublyLinkedList } from "@datastructures-js/linked-list";
 import { IEdgeList } from "./types/triangulationTypes";
 
 type IVertex = {
