@@ -1,7 +1,10 @@
+import { klona } from "klona";
+import { nanoid } from "nanoid";
 import { Point, Vector } from "../../geometry";
 import { grahamScan } from "../convex-hull/grahamScan";
 
 export interface ITriangle {
+  id: string;
   i: Point;
   j: Point;
   k: Point;
@@ -21,14 +24,15 @@ interface IHullEdge {
 
 // shuffle the point array
 function shuffle(array: Point[]) {
+  const newArray = [...array];
   let j, x, i;
-  for (i = array.length - 1; i > 0; i--) {
+  for (i = newArray.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1));
-    x = array[i];
-    array[i] = array[j];
-    array[j] = x;
+    x = newArray[i];
+    newArray[i] = newArray[j];
+    newArray[j] = x;
   }
-  return array;
+  return newArray;
 }
 
 // connect the corners of the Hull to the points
@@ -38,11 +42,11 @@ function connect(point: Point, hull: IHullEdge[], triangulation: ITriangle[]) {
 
   for (let index = 0; index < hull.length; index++) {
     const hullEdge = hull[index];
-
     // here you use the hull, because of the hull you know the triangles that are around the hull
     // these you can easy use to add the neighbours to the new triangle!
     // triangle forms a linked list
     const triangle: ITriangle = {
+      id: nanoid(),
       i: point,
       j: hullEdge.edge.a,
       k: hullEdge.edge.b,
@@ -95,13 +99,6 @@ function connect(point: Point, hull: IHullEdge[], triangulation: ITriangle[]) {
     createdTriangles.push(triangle);
   }
 
-  const firstTriangle = createdTriangles[0];
-  const lastTriangle = createdTriangles[createdTriangles.length - 1];
-  firstTriangle.neighbours = {
-    ...firstTriangle.neighbours,
-    i_j: lastTriangle,
-  };
-
   const outputTriangulation = [...inputTriangulation, ...createdTriangles];
 
   // console.log("Connected Triangulation", outputTriangulation);
@@ -127,34 +124,46 @@ function pointInTriangle(pt: Point, triangle: ITriangle) {
   return !(has_neg && has_pos);
 }
 
-function pointInCircle(point: Point, p1: Point, p2: Point, p3: Point) {
-  // calculate the area of the triangle formed by the three points
-  const area =
-    0.5 *
-    (-p2.y * p3.x + p1.y * (-p2.x + p3.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y);
+function findCircle(p1: Point, p2: Point, p3: Point) {
+  // p1, p2, and p3 are objects representing the x, y coordinates of the points
+  // Example: { x: 1, y: 2 }
 
-  // calculate the center of the circle by averaging the x and y coordinates of the three points
-  const center = {
-    x: (1 / (3 * area)) * (p1.x + p2.x + p3.x),
-    y: (1 / (3 * area)) * (p1.y + p2.y + p3.y),
-  };
+  // Find the slope of the perpendicular bisector of line segment p1p2
+  const m1 = -(p2.x - p1.x) / (p2.y - p1.y);
+  const mid1 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+  const b1 = mid1.y - m1 * mid1.x;
 
-  // calculate the radius of the circle using the distance formula
-  const radius = Math.sqrt(
-    Math.pow(p1.x - center.x, 2) + Math.pow(p1.y - center.y, 2)
-  );
+  // Find the slope of the perpendicular bisector of line segment p2p3
+  const m2 = -(p3.x - p2.x) / (p3.y - p2.y);
+  const mid2 = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
+  const b2 = mid2.y - m2 * mid2.x;
 
-  // check if the point is within the circle using the distance formula
-  return (
-    Math.sqrt(
-      Math.pow(point.x - center.x, 2) + Math.pow(point.y - center.y, 2)
-    ) <= radius
-  );
+  // Find the center of the circle
+  const x = (b2 - b1) / (m1 - m2);
+  const y = m1 * x + b1;
+  const center = new Point(x, y);
+
+  // Find the radius of the circle
+  const radius = Math.sqrt((center.x - p1.x) ** 2 + (center.y - p1.y) ** 2);
+
+  return { center, radius };
 }
 
-function checkDelaunyCondition(point: Point, triangle: ITriangle) {
+function isPointInCircle(point: Point, center: Point, radius: number) {
+  // Calculate the distance between the point and the center of the circle
+  const distance = Math.sqrt(
+    (point.x - center.x) ** 2 + (point.y - center.y) ** 2
+  );
+
+  // Compare the distance with the radius of the circle
+  return distance <= radius;
+}
+
+function violatesDelaunyCondition(point: Point, triangle: ITriangle) {
   // if the point is not inside the circle of the 3 triangle points the delauny condition is achieved
-  return !pointInCircle(point, triangle.i, triangle.j, triangle.k);
+  const circumcircle = findCircle(triangle.i, triangle.j, triangle.k);
+
+  return isPointInCircle(point, circumcircle.center, circumcircle.radius);
 }
 
 // Does this function really find all violated triangles?
@@ -171,11 +180,12 @@ function findViolatedNeighboursRecursion(
   point: Point,
   violatedTriangles: ITriangle[]
 ) {
-  if (triangle.checked) {
+  if (triangle.checked || triangle.removed) {
     return;
   }
 
-  if (!checkDelaunyCondition(point, triangle)) {
+  const isViolated = violatesDelaunyCondition(point, triangle);
+  if (isViolated) {
     violatedTriangles.push(triangle);
   }
 
@@ -214,7 +224,7 @@ function removeTriangles(
   trianglesToRemove: ITriangle[]
 ) {
   return triangulation.filter((triangle) => {
-    if (trianglesToRemove.includes(triangle)) {
+    if (trianglesToRemove.find((t) => t.id === triangle.id)) {
       triangle.removed = true;
       return false;
     }
@@ -224,7 +234,7 @@ function removeTriangles(
 
 function getHullOfHole(violatedTriangles: ITriangle[]) {
   const innerHull: IHullEdge[] = [];
-
+  console.warn("Violated Triangles", violatedTriangles);
   violatedTriangles.forEach((triangle) => {
     // check all neighbours of the violated triangles
     // if a neighbour is not violated it lies on the border of the hole
@@ -233,9 +243,20 @@ function getHullOfHole(violatedTriangles: ITriangle[]) {
     // then add the edge without a neighbour triangle
     if (triangle.neighbours?.i_j) {
       const neighbour = triangle.neighbours.i_j;
-      if (!violatedTriangles.includes(neighbour)) {
-        const edge = new Vector(triangle.i, triangle.j);
-        innerHull.push({ edge, neighbour });
+      if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
+        // if (neighbour.removed) {
+        //   console.log("Wrong Inner Hull Triangle", neighbour);
+        //   throw new Error("A removed Tringle has been added to the innerHull");
+        // }
+        if (!neighbour.removed) {
+          const edge = new Vector(triangle.i, triangle.j);
+          console.warn("i_j: Add edge to inner hull", {
+            edge,
+            triangle,
+            neighbour,
+          });
+          innerHull.push({ edge, neighbour });
+        }
       }
     } else {
       const edge = new Vector(triangle.i, triangle.j);
@@ -244,9 +265,20 @@ function getHullOfHole(violatedTriangles: ITriangle[]) {
 
     if (triangle.neighbours?.j_k) {
       const neighbour = triangle.neighbours.j_k;
-      if (!violatedTriangles.includes(neighbour)) {
-        const edge = new Vector(triangle.j, triangle.k);
-        innerHull.push({ edge, neighbour });
+      if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
+        // if (neighbour.removed) {
+        //   console.log("Wrong Inner Hull Triangle", neighbour);
+        //   throw new Error("A removed Tringle has been added to the innerHull");
+        // }
+        if (!neighbour.removed) {
+          const edge = new Vector(triangle.j, triangle.k);
+          console.warn("j_k: Add edge to inner hull", {
+            edge,
+            triangle,
+            neighbour,
+          });
+          innerHull.push({ edge, neighbour });
+        }
       }
     } else {
       const edge = new Vector(triangle.j, triangle.k);
@@ -255,9 +287,25 @@ function getHullOfHole(violatedTriangles: ITriangle[]) {
 
     if (triangle.neighbours?.k_i) {
       const neighbour = triangle.neighbours.k_i;
-      if (!violatedTriangles.includes(neighbour)) {
-        const edge = new Vector(triangle.k, triangle.i);
-        innerHull.push({ edge, neighbour });
+      console.log("Neighbour KI:", {
+        violatedTriangles,
+        neighbour,
+        isViolated: violatedTriangles.find((t) => t.id === triangle.id),
+      });
+      if (!violatedTriangles.find((t) => t.id === neighbour.id)) {
+        // if (neighbour.removed) {
+        //   console.log("Wrong Inner Hull Triangle", neighbour);
+        //   throw new Error("A removed Tringle has been added to the innerHull");
+        // }
+        if (!neighbour.removed) {
+          const edge = new Vector(triangle.k, triangle.i);
+          console.warn("k_i: Add edge to inner hull", {
+            edge,
+            triangle,
+            neighbour,
+          });
+          innerHull.push({ edge, neighbour });
+        }
       }
     } else {
       const edge = new Vector(triangle.k, triangle.i);
@@ -287,7 +335,7 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
 
   // compute the set of inner Points
   const innerPoints = points.filter((point) => {
-    if (!hullPoints.includes(point)) return point;
+    if (!hullPoints.find((p) => p.id === point.id)) return point;
   });
 
   // this algo needs inner points (we could add one random point in this case)
@@ -296,26 +344,39 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
   }
 
   // shuffle the Inner points
-  const shuffledInnerPoints = shuffle([...innerPoints]);
+  // const shuffledInnerPoints = shuffle(innerPoints);
+  const shuffledInnerPoints = innerPoints;
 
   // Compute init Triangulation D
   let triangulation = connect(shuffledInnerPoints[0], convexHull, []);
 
-  // console.log("Shuffle Inner Points", shuffledInnerPoints);
+  console.log("Initial Triangulation", triangulation);
 
   for (let index = 1; index < shuffledInnerPoints.length; index++) {
-    // console.log("In Loop Iteration #", index);
+    console.log("In Loop Iteration #", index);
     const point_r = shuffledInnerPoints[index];
+    console.log("Point R", point_r);
 
     // find the triangle containing p_r
     const containingTriangleList = triangulation.filter((triangle) => {
-      if (pointInTriangle(point_r, triangle)) return triangle;
+      if (pointInTriangle(point_r, triangle)) {
+        return triangle;
+      }
     });
 
-    const containingTriangle =
-      containingTriangleList[containingTriangleList.length - 1];
+    if (containingTriangleList.length !== 1) {
+      console.error("Containing Triangle List", {
+        triangulation,
+        point_r,
+        containingTriangleList,
+      });
+      // throw new Error(
+      //   " Containing Triangle List should have exactly 1 Triangle"
+      // );
+    }
 
-    // console.log("Containing Triangle:", containingTriangle);
+    const containingTriangle = containingTriangleList[0];
+    console.log("Containing Triangle:", containingTriangle);
 
     // find all triangles which delauny is violated
     const violatedTriangles = findViolatedTriangles(
@@ -334,14 +395,15 @@ function delaunyTriangulation(points: Point[]): ITriangle[] {
 
     let hole = [...violatedTriangles];
     if (hole.length === 0) {
+      console.warn("No violated Triangles found ...?");
       hole = [containingTriangle];
     }
-    // console.log("Hole", hole);
+    console.warn("Hole", hole);
 
     const innerHull = getHullOfHole(hole);
 
     // console.log("Inner Hull", innerHull);
-
+    console.warn("Inner Hull", innerHull);
     const newTriangulation = connect(point_r, innerHull, cleanedTriangulation);
 
     newTriangulation.forEach((triangle) => {
