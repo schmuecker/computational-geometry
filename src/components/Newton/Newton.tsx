@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Option, RadioGroup } from "../RadioGroup/RadioGroup";
+import { ToggleSwitch } from "../ToggleSwitch/ToggleSwitch";
 import NewtonCanvas from "./NewtonCanvas/NewtonCanvas";
 
 interface func {
@@ -42,6 +43,7 @@ const Newton = () => {
   const [fnId, setFnId] = useState<Option["id"]>(() => functionOptions[0].id);
   const [accuracy, setAccuracy] = useState<number>(0.01);
   const [maxIter, setMaxIter] = useState<number>(10);
+  const [damping, setDamping] = useState<boolean>(false);
 
   let activeFunction: func;
   if (fnId) {
@@ -52,6 +54,10 @@ const Newton = () => {
 
   const handleFuncChanged = (id: Option["id"]) => {
     setFnId(id);
+  };
+
+  const handleDampChanged = (e: React.BaseSyntheticEvent) => {
+    setDamping(e.target.checked);
   };
 
   const handleAccuracyChange = (value: number) => {
@@ -79,7 +85,7 @@ const Newton = () => {
           onChange={handleFuncChanged}
         />
       </div>
-      <div className="mb-8 flex flex-row">
+      <div className="mb-8 flex flex-row ">
         <div>
           <p>Accuracy</p>
           <input
@@ -100,12 +106,20 @@ const Newton = () => {
             onChange={(e) => handleMaxIterChange(e.target.valueAsNumber)}
           />
         </div>
+        <div className="pl-10">
+          <ToggleSwitch
+            label={"Damping"}
+            onChange={handleDampChanged}
+            defaultChecked={false}
+          />
+        </div>
       </div>
       <NewtonCanvas
         mathFunction={(x) => activeFunction.fn(x)}
         derivitive={(x) => activeFunction.dfn(x)}
         accuracy={accuracy}
         maxIter={maxIter}
+        damping={damping}
       />
     </div>
   );
