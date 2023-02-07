@@ -18,6 +18,7 @@ interface NewtonCanvasProps {
   derivitive: (x: number) => number;
   accuracy: number;
   maxIter: number;
+  damping: boolean;
 }
 
 function NewtonCanvas({
@@ -25,6 +26,7 @@ function NewtonCanvas({
   derivitive,
   accuracy,
   maxIter,
+  damping,
 }: NewtonCanvasProps) {
   const [approxRoots, setApproxRoots] = useState<number[]>([]);
   useEffect(() => {
@@ -42,7 +44,7 @@ function NewtonCanvas({
             startX: x,
             maxIter: maxIter,
             accuracy: accuracy,
-            damping: false,
+            damping: damping,
           })
         );
       }
